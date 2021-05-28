@@ -28,7 +28,7 @@ private:
 	std::vector<std::vector<PieceOfMap>> map; // array which contains information about actions in certain point of map: 
 											  //0 - there ware no any action, 
 											  //1 - ship has been placed in this area;
-	                                          //2 - deck of ship was destroyed.
+	                                          //2 - deck of ship has been destroyed.
 											  //3 - area which can't contan any ship
 	std::vector<Ship> ships;
 
@@ -47,6 +47,7 @@ public:
 	void placeShip(const Ship& ship);
 	bool placeShip(const OutMapShip& ship, const sf::RenderWindow* window);
 	void attack(const sf::RenderWindow* window);
+	void clearMap();
 
 
 	void updateMap(const sf::RenderWindow* window);

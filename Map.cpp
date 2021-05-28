@@ -363,6 +363,18 @@ void Map::attack(const sf::RenderWindow* window)
 	}
 }
 
+void Map::clearMap()
+{
+	for (int i = 0; i < this->mapSizeI; i++)
+	{
+		this->map[i].resize(mapSizeJ);
+		for (int j = 0; j < this->mapSizeJ; j++)
+		{
+			this->map[i][j].value = 0;
+		}
+	}
+}
+
 Map::PieceOfMap::PieceOfMap()
 {
 }

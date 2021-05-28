@@ -3,22 +3,21 @@
 #include "Map.h"
 #include <sstream>
 #include <vector>
+#include <stack>
 #include "OutMapShip.h"
+#include "State.h"
+#include "GameState.h"
+#include "PlacingState.h"
+#include "MainMenuState.h"
 
 class Game
 {
 private:
 	sf::RenderWindow* window;
 	sf::VideoMode videoMode;
-	sf::Event event;
-	sf::Font font;
-	sf::Text infoText;
-	bool mouseLeftFrontEdge, mouseLeftBackEdge;
-	bool spaceFrontEdge, spaceBackEdge;
+	sf::Event sfEvent;
 
-	Map playerMap, enemyMap = Map(1);
-
-	std::vector<OutMapShip> outMapShip;
+	std::stack<State*> states;
 
 public:
 	
