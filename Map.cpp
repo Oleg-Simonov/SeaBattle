@@ -9,7 +9,7 @@ Map::Map()
 	this->shipsAmount = 0;
 	this->mapSizeI = 10;
 	this->mapSizeJ = 10;
-	//this->ships.reserve(5);
+	this->ships.reserve(5);
 
 	this->map.resize(mapSizeI);
 	for (int i = 0; i < this->mapSizeI; i++)
@@ -25,6 +25,20 @@ Map::Map()
 			this->map[i][j].shapeForPlayer.setPosition(sf::Vector2f(30.f + j * 29, 50.f + i * 29));
 		}
 	}
+
+	this->ships.emplace_back(9, 0, true, 1);
+this->ships.emplace_back(5, 3, true, 1);
+this->ships.emplace_back(3, 2, false, 1);
+this->ships.emplace_back(3, 8, true, 1);
+this->ships.emplace_back(1, 6, false, 1);
+
+this->placeShip(ships[0]);
+this->placeShip(ships[1]);
+this->placeShip(ships[2]);
+this->placeShip(ships[3]);
+this->placeShip(ships[4]);
+
+this->currentShipsAmount = this->ships.size();
 
 	std::cout << std::endl;
 	this->getMapValue();
@@ -132,10 +146,15 @@ void Map::getMapValue() const
 		}
 }
 
-sf::RectangleShape Map::getMapValue(int i, int j) const
+int Map::getMapValue(int i, int j) const
+{
+	return this->map[i][j].value;
+}
+
+/*sf::RectangleShape Map::getMapValue(int i, int j) const
 {
 	return this->map[i][j].shapeForDebug;
-}
+}*/
 
 int Map::getShipsAmount() const
 {
@@ -294,21 +313,25 @@ bool Map::placeShip(const OutMapShip& outMapShip, const sf::RenderWindow* window
 	
 }
 
-void Map::attack(const sf::RenderWindow* window) 
+int Map::attack(const sf::RenderWindow* window, int attackI, int attackJ)
 {
-	//determination ship's coordinates in depends on cursor location
-	int attackI = 1000;
-	int attackJ = 1000;
+	//return 0 - if miss;
+	//return 1 - if the ship has been damaged;
+	//return 2 - if the ship has been destroyed;
 
-	for (int i = 0; i < this->getSizeI(); i++)
+	//determination ship's coordinates in depends on cursor location
+	if (attackI == 1000 && attackJ == 1000)
 	{
-		for (int j = 0; j < this->getSizeJ(); j++)
+		for (int i = 0; i < this->getSizeI(); i++)
 		{
-			if (this->map[i][j].shapeForPlayer.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
+			for (int j = 0; j < this->getSizeJ(); j++)
 			{
-				attackI = i;
-				attackJ = j;
-				std::cout << "attackI " << attackI << "   attackj " << attackJ << std::endl;
+				if (this->map[i][j].shapeForPlayer.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
+				{
+					attackI = i;
+					attackJ = j;
+					std::cout << "attackI " << attackI << "   attackj " << attackJ << std::endl;
+				}
 			}
 		}
 	}
@@ -322,10 +345,10 @@ void Map::attack(const sf::RenderWindow* window)
 				this->map[attackI][attackJ].value = 2;
 				if (this->ships[i].getShipHp() == 0)
 				{
+
 					this->currentShipsAmount--;
 
 					//fixation area where another ship can't be
-
 					for (int j = 0; j < this->ships[i].getDeckAmount(); j++)
 					{
 						int currentCoordI = (this->ships[i].getCoordinates() + j)->i;
@@ -349,16 +372,22 @@ void Map::attack(const sf::RenderWindow* window)
 
 						if (                                      currentCoordJ - 1 >= 0 &&             map[currentCoordI][currentCoordJ - 1].value != 2)   map[currentCoordI][currentCoordJ - 1].value = 3;
 					}
+					std::cout << "you have destroyed " << i << " ship" << std::endl;
+					return 2;
 				}
-				std::cout << "you have hit " << i << " ship" << std::endl;
+				std::cout << "you have damaged " << i << " ship" << std::endl;
+				return 1;
 			}
 			else
+				//marking empty erea
 				if ((map[attackI][attackJ].value == 0) && (attackI < this->getSizeI()) && (attackJ < this->getSizeJ()))
 				{
 					this->map[attackI][attackJ].value = 3;
-					std::cout << "you haven't hit" << i << std::endl;
+					std::cout << "you haven't damaged " << i << std::endl;
+					return 0;
 				}
-				std::cout << "you haven't hit" << i << std::endl;
+				//std::cout << "you haven't hit " << i << std::endl;
+				//return 0;
 		}
 	}
 }

@@ -48,23 +48,23 @@ PlacingState::~PlacingState()
 void PlacingState::update(sf::RenderWindow* targetWindow)
 {	
 	//mouse poll----------------------------------------------------
-
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !this->clickFlags.mouseLeft) // передний фронт
 	{
+
 		for (int i = 0; i < this->outMapShip.size(); i++)
 		{
-			//если курсор мыши оказался над кораблем, то захватываетм его
+			//if cursor hover over the ship, we will grab it
 			if (this->outMapShip[i].shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*targetWindow).x, (float)sf::Mouse::getPosition(*targetWindow).y) && this->outMapShip[i].getGrab() == false)
 			{
 				this->outMapShip[i].setGrab(true);
 			}
-			//если удалость разместить корабль, снижаем количество неразмещенных кораблей
+			//if placing has been successful, we will lessen quantity of unplacing ships
 			else if (this->outMapShip[i].getGrab() == true && playerMap.placeShip(this->outMapShip[i], targetWindow))
 			{
 				std::cout << "grabgfdgdfgdgdfgdfgd " << this->outMapShip.size() << std::endl;
 				this->outMapShip.erase(this->outMapShip.begin() + i);
 			}
-			//иначе возвращаемся к исходному состоянию
+			//else we revert the ship to initial position
 			else
 			{
 				this->outMapShip[i].setGrab(false);
@@ -98,7 +98,7 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 
 	if (buttons2["START_GAME"]->isPressed() && !this->clickFlags.startButton)
 	{
-		if(this->outMapShip.size() == 0)	this->statesPointer->push(new GameState(statesPointer));
+		if(this->outMapShip.size() == 0)	this->statesPointer->push(new GameState(statesPointer, &playerMap));
 
 		else
 		{

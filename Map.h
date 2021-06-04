@@ -39,14 +39,15 @@ public:
 	int getSizeI() const;
 	int getSizeJ() const;
 	void getMapValue() const;
-	sf::RectangleShape getMapValue(int i, int j) const;
+	int getMapValue(int i, int j) const;
+	//sf::RectangleShape getMapValue(int i, int j) const;
 	int getShipsAmount() const;
 	int getCurrentShipsAmount() const;
 	std::vector<Ship>::const_iterator getShips() const;
 	
 	void placeShip(const Ship& ship);
 	bool placeShip(const OutMapShip& ship, const sf::RenderWindow* window);
-	void attack(const sf::RenderWindow* window);
+	int attack(const sf::RenderWindow* window, int attackI = 1000, int attackJ = 1000); //if attackI and attackJ are exist then computer attacks player's map
 	void clearMap();
 
 
