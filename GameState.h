@@ -48,8 +48,9 @@ public:
 
     void coordCalc();
     void coordCalc(int coorI, int coorJ);
-    int botAttack(sf::RenderWindow* targetWindow);
+    void botAttack(sf::RenderWindow* targetWindow, int coorI, int coorJ);
     bool checkField(int coorI, int coorJ);
+    void ArtificInt(sf::RenderWindow* targetWindow);
     void update(sf::RenderWindow* targetWindow = nullptr);
     void render(sf::RenderWindow* targetWindow = nullptr);
 };

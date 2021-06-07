@@ -61,25 +61,23 @@ void GameState::coordCalc(int coorI, int coorJ)
 	coorOfStrike.i = coorI;
 }
 
-int GameState::botAttack(sf::RenderWindow* targetWindow)
+void GameState::botAttack(sf::RenderWindow* targetWindow, int coorI, int coorJ)
 {
+	coordCalc(coorI, coorJ);
 	std::cout << "coorOfStrike i = " << coorOfStrike.i << " coorOfStrike j = " << coorOfStrike.j << std::endl;
-	switch (this->playerMap->attack(targetWindow, coorOfStrike.i, coorOfStrike.j))
+	switch (this->playerMap->attack(targetWindow, coorI, coorJ))
 	{
 	case 0:
 		std::cout << " Miss! " << std::endl;
 		this->playerMove = 1;
-		return 1;
 		break;
 	case 1:
 		std::cout << " Damaged! " << std::endl;
 		this->damagedDecks.push_back(coorOfStrike);
-		return 0;
 		break;
 	case 2:
 		std::cout << " Destroyed! " << std::endl;
 		this->damagedDecks.clear();
-		return 0;
 		break;
 	default:
 		break;
@@ -92,7 +90,7 @@ bool GameState::checkField(int coorI, int coorJ) //this function check whether m
 	{
 		for (int i = 0; i < this->nonRepeatVector.size(); i++)
 		{
-			std::cout << this->nonRepeatVector[i] << std::endl;
+			//std::cout << this->nonRepeatVector[i] << std::endl;
 			if (this->nonRepeatVector[i] == coorI * 10 + coorJ)
 				return 1;
 		}
@@ -101,334 +99,243 @@ bool GameState::checkField(int coorI, int coorJ) //this function check whether m
 	return 0;
 }
 
+void GameState::ArtificInt(sf::RenderWindow* targetWindow)
+{
+	//the first random shot, but we don't shoot in area where we shot before.
+	coordCalc();
+	if (this->damagedDecks.size() == 0)
+	{
+		std::cout << " 000 " << std::endl;
+
+		/*if(this->playerMap->getCurrentShipsAmount() == 5)
+		coordCalc(5, 7);
+		else if (this->playerMap->getCurrentShipsAmount() == 4)
+			coordCalc(1, 1);
+		else*/
+		botAttack(targetWindow, coorOfStrike.i, coorOfStrike.j);
+	}
+	//the ship has been damaged, we aproximatly know coordinates where could be a deck, we should strike next to it. 
+	//In general case, we have four direction for continue attack. Now we should determine direction of ship.
+	else if (this->damagedDecks.size() == 1)
+	{
+		std::cout << " 111 " << std::endl;
+
+		if (checkField(damagedDecks[0].i - 1, damagedDecks[0].j))
+			botAttack(targetWindow, damagedDecks[0].i - 1, damagedDecks[0].j);
+
+		else if (checkField(damagedDecks[0].i + 1, damagedDecks[0].j))
+			botAttack(targetWindow, damagedDecks[0].i + 1, damagedDecks[0].j);
+
+		else if (checkField(damagedDecks[0].i, damagedDecks[0].j - 1))
+			botAttack(targetWindow, damagedDecks[0].i, damagedDecks[0].j - 1);
+
+		else if (checkField(damagedDecks[0].i, damagedDecks[0].j + 1))
+			botAttack(targetWindow, damagedDecks[0].i, damagedDecks[0].j + 1);
+
+		else std::cout << "How did it happen?" << std::endl;
+	}
+	//we've determined direction of the ship. Now we should finish it off.
+	else
+	{
+		std::cout << " 222 " << std::endl;
+		int sizeDD = this->damagedDecks.size() - 1;
+
+		//horizontal ship------------------------------------------------------------------------------------
+		if (damagedDecks[0].i == damagedDecks[1].i)
+		{
+			if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1))
+				botAttack(targetWindow, damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1);
+
+			else
+			{
+				if (checkField(damagedDecks[0].i, damagedDecks[0].j + 1))
+					botAttack(targetWindow, damagedDecks[0].i, damagedDecks[0].j + 1);
+
+				else if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + 1))
+					botAttack(targetWindow, damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + 1);
+
+				else std::cout << "How did it happen3?" << std::endl;
+			}
+		}
+		//vertical ship--------------------------------------------------------------------------------------
+		else if (damagedDecks[0].j == damagedDecks[1].j)
+		{
+			if (checkField(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j))
+				botAttack(targetWindow, damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j);
+			else
+			{
+
+				if (checkField(damagedDecks[0].i + 1, damagedDecks[0].j))
+					botAttack(targetWindow, damagedDecks[0].i + 1, damagedDecks[0].j);
+
+				else if (checkField(damagedDecks[sizeDD].i + 1, damagedDecks[sizeDD].j))
+					botAttack(targetWindow, damagedDecks[sizeDD].i + 1, damagedDecks[sizeDD].j);
+
+				else std::cout << "How did it happen4?" << std::endl;
+			}
+		}
+		else std::cout << "How did it happen6?" << std::endl;
+	}
+}
+
+
+
 void GameState::update(sf::RenderWindow* targetWindow)
 {
 	if (this->playerMove == false)
 	{
-
-		if (this->damagedDecks.size() == 0)
-		{
-			std::cout << " 000 " << std::endl;
-			//coordCalc();
-			coordCalc(9, 0);
-			botAttack(targetWindow);
-		}
-
-		else if (this->damagedDecks.size() == 1)
-		{
-			std::cout << " 111 " << std::endl;
-			coordCalc();
-			if (damagedDecks[0].i - 1 >= 0 && checkField(damagedDecks[0].i - 1, damagedDecks[0].j) == 1)
-			{
-					coordCalc(damagedDecks[0].i - 1, damagedDecks[0].j);
-					botAttack(targetWindow);
-			}
-			else 
-
-			if (damagedDecks[0].i + 1 <= this->playerMap->getSizeI() && checkField(damagedDecks[0].i + 1, damagedDecks[0].j) == 1)
-			{
-					coordCalc(damagedDecks[0].i + 1, damagedDecks[0].j);
-					botAttack(targetWindow);
-			}
-			else 
-
-			if (damagedDecks[0].j - 1 <= this->playerMap->getSizeJ() && checkField(damagedDecks[0].i, damagedDecks[0].j - 1) == 1)
-			{
-					coordCalc(damagedDecks[0].i, damagedDecks[0].j - 1);
-					botAttack(targetWindow);
-			}
-			else 
-
-			if (damagedDecks[0].j + 1 <= this->playerMap->getSizeJ())
-			{
-				if (checkField(damagedDecks[0].i, damagedDecks[0].j + 1) == 1)
-				{
-					coordCalc(damagedDecks[0].i, damagedDecks[0].j + 1);
-					botAttack(targetWindow);
-				}
-			}
-			else std::cout << "How did it happen?" << std::endl;
-		}
-		else
-		{
-			std::cout << " 222 " << std::endl;
-			coordCalc();
-			int sizeDD = this->damagedDecks.size() - 1;
-			//	case 1: //the ship has been damaged, we aproximatly know coordinates where could be a deck, we should strike next to it. In general case, we have four direction for continue attack 
-			if (damagedDecks[0].i == damagedDecks[1].i) //horizontal ship
-			{
-				if (damagedDecks[sizeDD].j - 1 >= 0 || this->needComeBack == 1)
-				{
-
-					if (this->needComeBack == 0)
-					{
-						if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1) == 1)
-						{
-							coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1);
-							this->needComeBack = botAttack(targetWindow);
-						}
-						else
-							this->needComeBack = 1;
-							//std::cout << "How did it happen2?" << std::endl;
-					}
-					else if (this->needComeBack == 1)
-					{
-						int i = 1;
-						while (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + i) != 1)
-						{
-							i++;
-						}
-						if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + i) == 1)
-						{
-							coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + i);
-							botAttack(targetWindow);
-						}
-						else std::cout << "How did it happen4?" << std::endl;
-					}
-					else std::cout << "How did it happen5?" << std::endl;
-
-				}
-				else this->needComeBack = 1;
-
-			}
-
-			/*if (damagedDecks[sizeDD].i - 1 >= 0 && this->dirCounter == 0)
-			{
-				if (checkField(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j) != 1)
-				{
-					coordCalc(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j);
-					botAttack(targetWindow);
-					this->dirCounter++;
-				}
-			}
-			else if (damagedDecks[sizeDD].i + 1 <= this->playerMap->getSizeI() && this->dirCounter == 1)
-			{
-				if (checkField(damagedDecks[sizeDD].i + 1, damagedDecks[sizeDD].j) != 1)
-				{
-					coordCalc(damagedDecks[sizeDD].i + 1, damagedDecks[sizeDD].j);
-					botAttack(targetWindow);
-					this->dirCounter++;
-				}
-			}
-			else if (damagedDecks[sizeDD].j - 1 <= this->playerMap->getSizeJ() && this->dirCounter == 2)
-			{
-				if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1) != 1)
-				{
-					coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1);
-					botAttack(targetWindow);
-					this->dirCounter++;
-				}
-			}
-			else if (damagedDecks[sizeDD].j + 1 <= this->playerMap->getSizeJ())
-			{
-				if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + 1) != 1)
-				{
-					coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + 1);
-					botAttack(targetWindow);
-					this->dirCounter = 0;
-				}
-			}
-			else std::cout << "How did it happen?" << std::endl;*/
-		}
+		ArtificInt(targetWindow);
 	}
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//computer's move
 	/*
-	if (this->playerMove == false)
+	if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1))
+	{
+		coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1);
+		botAttack(targetWindow);
+	}
+	else
 	{
 
-		//this->coordCalc();
-		//std::cout << "i = " << coorOfStrike.i << " j = " << coorOfStrike.j << std::endl;
-		//this->playerMove = !this->playerMap->attack(targetWindow, coorOfStrike.i, coorOfStrike.j);
-		// 
-		//if we have a damaged ship, first of all we should destroy it 
-		std::cout << "damagedDecks.size = " << this->damagedDecks.size() << std::endl;
-		//switch (this->damagedDecks.size())
-		//{
-		//case 0: //random shot
-		if (this->damagedDecks.size())
+		if (checkField(damagedDecks[0].i, damagedDecks[0].j + 1))
 		{
-			std::cout << " 000 " << std::endl;
-			//coordCalc();
-			coordCalc(9, 0);
+			coordCalc(damagedDecks[0].i, damagedDecks[0].j + 1);
 			botAttack(targetWindow);
-			//	break;
 		}
+		else if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + 1))
+		{
+			coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + 1);
+			botAttack(targetWindow);
+		}
+		else std::cout << "How did it happen3?" << std::endl;
+	}
+			}
+			//vertical ship---------------------------------------------------------------------------------------------------
+			else if (damagedDecks[0].j == damagedDecks[1].j)
+			{
+			if (checkField(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j))
+			{
+				coordCalc(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j);
+				botAttack(targetWindow);
+			}
+			else
+			{
+
+				if (checkField(damagedDecks[0].i + 1, damagedDecks[0].j))
+				{
+					coordCalc(damagedDecks[0].i + 1, damagedDecks[0].j);
+					botAttack(targetWindow);
+				}
+				else if (checkField(damagedDecks[sizeDD].i + 1, damagedDecks[sizeDD].j))
+				{
+					coordCalc(damagedDecks[sizeDD].i + 1, damagedDecks[sizeDD].j);
+					botAttack(targetWindow);
+				}
+				else std::cout << "How did it happen4?" << std::endl;
+			}
+			}
+			else std::cout << "How did it happen6?" << std::endl;
+			*/
+
+
+
+
+
+/*
+	std::cout << " 222 " << std::endl;
+	coordCalc();
+	int sizeDD = this->damagedDecks.size() - 1;
 	//	case 1: //the ship has been damaged, we aproximatly know coordinates where could be a deck, we should strike next to it. In general case, we have four direction for continue attack 
-			std::cout << " 111 " << std::endl;
-			coordCalc();
-			std::cout << "damagedDecks i = " << damagedDecks[0].i << " damagedDecks j = " << damagedDecks[0].j << std::endl;
-			//if (damagedDecks[0].i > 0 && damagedDecks[0].i < this->playerMap->getSizeI() - 1 && damagedDecks[0].j > 0 && damagedDecks[0].j < this->playerMap->getSizeJ() - 1)
-			//{
-				if (checkField(damagedDecks[this->counter].i, damagedDecks[this->counter].j - 1) && damagedDecks[0].j > 0) //checking whether hit priviously field or not
+	//horizontal ship------------------------------------------------------------------------------------
+	if (damagedDecks[0].i == damagedDecks[1].i)
+	{
+		if (damagedDecks[sizeDD].j - 1 >= 0 || this->needComeBack == 1)
+		{
+
+			if (this->needComeBack == 0)
+			{
+				if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1) == 1)
 				{
-					coordCalc(damagedDecks[this->counter].i, damagedDecks[this->counter].j - 1);
-					botAttack(targetWindow);
-				}
-				else if (checkField(damagedDecks[this->counter].i + 1, damagedDecks[this->counter].j) && damagedDecks[0].i < this->playerMap->getSizeI() - 1)
-				{
-					coordCalc(damagedDecks[this->counter].i + 1, damagedDecks[this->counter].j);
-					botAttack(targetWindow);
-				}
-				else if (checkField(damagedDecks[this->counter].i, damagedDecks[this->counter].j+1) && damagedDecks[0].j < this->playerMap->getSizeJ() - 1)
-				{
-					coordCalc(damagedDecks[this->counter].i, damagedDecks[this->counter].j + 1);
-					botAttack(targetWindow);
+					coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1);
+					this->needComeBack = botAttack(targetWindow);
 				}
 				else
+					this->needComeBack = 1;
+				//std::cout << "How did it happen2?" << std::endl;
+			}
+			else if (this->needComeBack == 1)
+			{
+				int i = 1;
+				while (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + i) != 1)
 				{
-					coordCalc(damagedDecks[this->counter].i - 1, damagedDecks[this->counter].j);
+					i++;
+				}
+				if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + i) == 1)
+				{
+					coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + i);
 					botAttack(targetWindow);
 				}
+				else std::cout << "How did it happen4?" << std::endl;
+			}
+			else std::cout << "How did it happen5?" << std::endl;
 
-			//}
-			//Corner cases----------------------------------------------------------------------------------------------------------------- 
-			//left high-----------------------------------------
-		/*	else if (damagedDecks[0].i == 0 && damagedDecks[0].j == 0)
+		}
+		else this->needComeBack = 1;
+	}
+	//vertical ship---------------------------------------------------------------------------------------------------
+	else if (damagedDecks[0].j == damagedDecks[1].j)
+	{
+		if (damagedDecks[sizeDD].i - 1 >= 0 || this->needComeBack == 1)
+		{
+
+			if (this->needComeBack == 0)
 			{
-				bool foundFlag = 0;
-				for (int i = 0; i < this->nonRepeatVector.size(); i++)
+				if (checkField(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j) == 1)
 				{
-					if (this->nonRepeatVector[i] == 1)
-					{
-						coordCalc(0, 1);
-						botAttack(targetWindow);
-						break;
-					}
+					coordCalc(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j);
+					this->needComeBack = botAttack(targetWindow);
 				}
-				if (foundFlag == 0)
+				else
+					this->needComeBack = 1;
+				//std::cout << "How did it happen2?" << std::endl;
+			}
+			else if (this->needComeBack == 1)
+			{
+				int i = 1;
+				while (checkField(damagedDecks[sizeDD].i + i, damagedDecks[sizeDD].j) != 1)
 				{
-					coordCalc(1, 0);
+					i++;
+				}
+				if (checkField(damagedDecks[sizeDD].i + i, damagedDecks[sizeDD].j) == 1)
+				{
+					coordCalc(damagedDecks[sizeDD].i + i, damagedDecks[sizeDD].j);
 					botAttack(targetWindow);
 				}
+				else std::cout << "How did it happen4?" << std::endl;
 			}
+			else std::cout << "How did it happen5?" << std::endl;
 
-			//left down -----------------------------------------
-			else if (damagedDecks[0].i == 9 && damagedDecks[0].j == 0)
-			{
-				bool foundFlag = 0;
-				for (int i = 0; i < this->nonRepeatVector.size(); i++)
-				{
-					if (this->nonRepeatVector[i] == 91)
-					{
-						foundFlag = 1;
-						coordCalc(9, 1);
-						botAttack(targetWindow);
-						break;
-					}
-				}
-				if (foundFlag == 0)
-				{
-					coordCalc(8, 0);
-					botAttack(targetWindow);
-				}
-			}
-			break;*/
-
-	/*	case 2: //the ship has been damaged, we aproximatly know coordinates where could be a deck, we should strike next to it. In general case, we have four direction for continue attack 
-			std::cout << " 222 " << std::endl;
-			//Corner cases----------------------------------------------------------------------------------------------------------------- 
-			//left high-----------------------------------------
-			coordCalc();
-			if (damagedDecks[0].i == 0 && damagedDecks[0].j == 0 && damagedDecks[1].j == 0)
-			{
-				coordCalc(2, 0);
-				botAttack(targetWindow);
-			}
-			else if (damagedDecks[0].i == 0 && damagedDecks[0].j == 0 && damagedDecks[1].j == 1)
-			{
-				coordCalc(0, 2);
-				botAttack(targetWindow);
-			}
-
-			//left down -----------------------------------------
-			else if (damagedDecks[0].i == 9 && damagedDecks[0].j == 0 && damagedDecks[1].j == 0)
-			{
-				coordCalc(7, 0);
-				botAttack(targetWindow);
-			}
-			else if (damagedDecks[0].i == 9 && damagedDecks[0].j == 0 && damagedDecks[1].j == 1)
-			{
-				
-				coordCalc(9, 2);
-				botAttack(targetWindow);
-			}
-			break;
-
-		case 3: //the ship has been destroyed, we have no idea where another ships, in next iteration we will have to strike randomly
-			std::cout << " 333 " << std::endl;
-			//Corner cases----------------------------------------------------------------------------------------------------------------- 
-			//left high-----------------------------------------
-			coordCalc();
-			if (damagedDecks[0].i == 0 && damagedDecks[0].j == 0 && damagedDecks[1].j == 0)
-			{
-				coordCalc(3, 0);
-				botAttack(targetWindow);
-			}
-			else if (damagedDecks[0].i == 0 && damagedDecks[0].j == 0 && damagedDecks[1].j == 1)
-			{
-				coordCalc(0, 3);
-				botAttack(targetWindow);
-			}
-
-			//left down -----------------------------------------
-			else if (damagedDecks[0].i == 9 && damagedDecks[0].j == 0 && damagedDecks[1].j == 0)
-			{
-				coordCalc(6, 0);
-				botAttack(targetWindow);
-			}
-			else if (damagedDecks[0].i == 9 && damagedDecks[0].j == 0 && damagedDecks[1].j == 1)
-			{
-				coordCalc(9, 3);
-				botAttack(targetWindow);
-			}
-			break;
-
-		default:
-			std::cout << "attack function error" << std::endl;
-			break;
+		}
+		else this->needComeBack = 1;
+	}
+	else std::cout << "How did it happen6?" << std::endl;
 		}
 
-	}*/
+		*/
+
+
+
+
+
+
+
+
+
+
+
+
 
 	//mouse poll----------------------------------------------------
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !this->clickFlags.mouseLeft)

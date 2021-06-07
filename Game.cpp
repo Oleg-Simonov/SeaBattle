@@ -8,9 +8,9 @@ Game::Game()
 	this->window = new sf::RenderWindow(videoMode, "SeaBattle");
 	this->window->setFramerateLimit(60);
 
-	//this->states.emplace(new PlacingState());
+	this->states.emplace(new PlacingState(&this->states));
 	//this->states.emplace(new MainMenuState(&this->states));
-	this->states.emplace(new GameState(&this->states));
+	//this->states.emplace(new GameState(&this->states));
 }
 
 Game::~Game()

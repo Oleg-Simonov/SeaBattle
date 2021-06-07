@@ -30,11 +30,15 @@ PlacingState::PlacingState(std::stack<State*>* statesPointer) : State(statesPoin
 		&this->font, "Start game!",
 		sf::Color(70, 70, 70, 200), sf::Color(150, 150, 150, 255), sf::Color(20, 20, 20, 200));
 
-	this->buttons2["AGAIN"] = new Button(100, 600, 150, 50,
+	this->buttons2["RANDOM"] = new Button(100, 600, 150, 50,
+		&this->font, "Place randomly",
+		sf::Color(70, 70, 70, 200), sf::Color(150, 150, 150, 255), sf::Color(20, 20, 20, 200));
+
+	this->buttons2["AGAIN"] = new Button(100, 700, 150, 50,
 		&this->font, "Start placing again",
 		sf::Color(70, 70, 70, 200), sf::Color(150, 150, 150, 255), sf::Color(20, 20, 20, 200));
 
-	this->buttons2["TO_MAIN_MENU"] = new Button(100, 700, 150, 50,
+	this->buttons2["TO_MAIN_MENU"] = new Button(100, 800, 150, 50,
 		&this->font, "To main menu",
 		sf::Color(70, 70, 70, 200), sf::Color(150, 150, 150, 255), sf::Color(20, 20, 20, 200));
 }
@@ -113,6 +117,17 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 	if (!buttons2["START_GAME"]->isPressed() && this->clickFlags.startButton)
 	{
 		this->clickFlags.startButton = false;
+	}
+
+	if (buttons2["RANDOM"]->isPressed() && !this->clickFlags.randomButton)
+	{
+		this->playerMap.randomPlace();
+		this->clickFlags.randomButton= true;
+	}
+
+	if (!buttons2["RANDOM"]->isPressed() && this->clickFlags.randomButton)
+	{
+		this->clickFlags.randomButton = false;
 	}
 
 	if (buttons2["AGAIN"]->isPressed() && !this->clickFlags.againlButton)
