@@ -54,7 +54,8 @@ public:
 	int getCurrentShipsAmount() const;
 	std::vector<Ship>::const_iterator getShips() const;
 
-	void calcProhibitedZone(int dir);
+	void calcProhibitedZone(int deckAmount);
+	void calcCoordinanes(int deckAmount);
 	void randomPlace();
 	void placeShip(int coorI, int coorJ, bool dir, int deckAmount);
 	void placeShip(const Ship& ship);

@@ -309,29 +309,18 @@ void Map::placeShip(const Ship& ship) //for computer's ships
 
 void Map::calcProhibitedZone(int deckAmount)
 {
-	std::cout << "na4alo" << std::endl;
-
 	//calculate prohibited zone-------------------------------------------
 	for (int i = 0; i < this->prohibitedZone.size(); i++)
 	{
 		for (int j = 0; j < this->prohibitedZone.size(); j++)
 		{
 			this->prohibitedZone[i][j] = 0;
-			std::cout << this->prohibitedZone[i][j] << " ";
+			//std::cout << this->prohibitedZone[i][j] << " ";
 		}
-		std::cout << std::endl;
+		//std::cout << std::endl;
 	}
-	
+
 	std::cout << std::endl;
-
-	dir = rand() % 2; //0 - vertical, 1 - horizontal
-	/*if (this->ships.size())
-	{
-		dir = 0;
-	}
-	else dir = 1;*/
-	
-
 	
 	if (dir) //new ship is gonna be horizontal
 	{
@@ -365,13 +354,13 @@ void Map::calcProhibitedZone(int deckAmount)
 					}
 				}
 
-				for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1 && i >= 0 && i < this->mapSizeI; i++)
+				for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
 				{
-					for (int j = coorShipHeadJ - 1; j >= coorShipHeadJ - deckAmount && j >= 0 && j < this->mapSizeJ; j--)
+					for (int j = coorShipHeadJ - 1; j >= coorShipHeadJ - deckAmount; j--)
 					{
-						std::cout << "i = " << i << "j = " << j << std::endl;
+						//std::cout << "i = " << i << "j = " << j << std::endl;
 
-						//if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ) 
+						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ) 
 						this->prohibitedZone[i][j] = 7;
 
 					}
@@ -395,7 +384,7 @@ void Map::calcProhibitedZone(int deckAmount)
 				{
 					for (int j = coorShipHeadJ - 1; j >= coorShipHeadJ - deckAmount /*&& j >= 0 && j < this->mapSizeJ*/; j--)
 					{
-						std::cout << "i = " << i << "j = " << j << std::endl;
+						//std::cout << "i = " << i << "j = " << j << std::endl;
 
 						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ) 
 						this->prohibitedZone[i][j] = 7;
@@ -403,6 +392,16 @@ void Map::calcProhibitedZone(int deckAmount)
 					}
 				}
 			}
+
+			for (int j = 0; j < this->prohibitedZone.size(); j++)
+			{
+				for (int k = 0; k < this->prohibitedZone.size(); k++)
+				{
+					std::cout << this->prohibitedZone[j][k] << " ";
+				}
+				std::cout << std::endl;
+			}
+			std::cout << std::endl;
 		}
 	}
 	else //new ship is gonna be vertical--------------------------------------------------------------------------------------------------------------------------------------------
@@ -441,7 +440,7 @@ void Map::calcProhibitedZone(int deckAmount)
 				{
 					for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); j++)
 					{
-						std::cout << "i = " << i << "j = " << j << std::endl;
+						//std::cout << "i = " << i << "j = " << j << std::endl;
 
 						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ) 
 						this->prohibitedZone[i][j] = 7;
@@ -467,7 +466,7 @@ void Map::calcProhibitedZone(int deckAmount)
 				{
 					for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + 1; j++)
 					{
-						std::cout << "i = " << i << "j = " << j << std::endl;
+						//std::cout << "i = " << i << "j = " << j << std::endl;
 
 						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
 							this->prohibitedZone[i][j] = 7;
@@ -476,21 +475,35 @@ void Map::calcProhibitedZone(int deckAmount)
 				}
 			}
 		}
-
-
-	}
-
-	for (int j = 0; j < this->prohibitedZone.size(); j++)
-	{
-		for (int k = 0; k < this->prohibitedZone.size(); k++)
+		for (int j = 0; j < this->prohibitedZone.size(); j++)
 		{
-			std::cout << this->prohibitedZone[j][k] << " ";
+			for (int k = 0; k < this->prohibitedZone.size(); k++)
+			{
+				std::cout << this->prohibitedZone[j][k] << " ";
+			}
+			std::cout << std::endl;
 		}
 		std::cout << std::endl;
 	}
 
-	//calculate coordinates of head of ship-------------------------------
 
+}
+
+void Map::calcCoordinanes(int deckAmount)
+{
+	dir = rand() % 2; //0 - vertical, 1 - horizontal
+	/*if (this->ships.size())
+	{
+		dir = 0;
+	}
+	else dir = 1;*/
+
+	std::cout << "na4alo" << " dir = " << dir << std::endl;
+
+	calcProhibitedZone(deckAmount);
+
+
+	//calculate coordinates of head of ship-------------------------------
 	this->nonRepeatVector.clear();
 
 	for (int i = 0; i < this->prohibitedZone.size(); i++)
@@ -504,6 +517,9 @@ void Map::calcProhibitedZone(int deckAmount)
 			}
 		}
 	}
+
+	
+		std::cout << " SIZEEEEE = " << this->nonRepeatVector.size() << std::endl;
 
 	if (this->nonRepeatVector.size())
 	{
@@ -521,120 +537,52 @@ void Map::calcProhibitedZone(int deckAmount)
 	}
 	else
 	{
-		dir = !dir;
-		std::cout << " YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY" << std::endl;
-	}
-		
-		
+			dir = !dir;
+			std::cout << "----------RESTART------------" << std::endl;
+			calcProhibitedZone(deckAmount);
 
-			/*int coorShipHeadI = this->ships[i].getI();
-			int coorShipHeadJ = this->ships[i].getJ();
-			for (int j = 0; j < this->ships[i].getDeckAmount(); j++)
+			//calculate coordinates of head of ship-------------------------------
+			this->nonRepeatVector.clear();
+
+			for (int i = 0; i < this->prohibitedZone.size(); i++)
 			{
-				this->prohibitedZone[coorShipHeadI][coorShipHeadJ] = 2;
-
-				if (coorShipHeadI - 1 >= 0 && coorShipHeadJ - 1 >= 0 && this->map[coorShipHeadI - 1][coorShipHeadJ - 1].value == 0) this->prohibitedZone[coorShipHeadI - 1][coorShipHeadJ - 1] = 1;
-
-				if (coorShipHeadI + 1 < this->mapSizeI && coorShipHeadJ - 1 >= 0 && this->map[coorShipHeadI + 1][coorShipHeadJ - 1].value == 0) this->prohibitedZone[coorShipHeadI + 1][coorShipHeadJ - 1] = 1;
-
-				if (coorShipHeadI - 1 >= 0 && coorShipHeadJ + 1 < this->mapSizeJ && this->map[coorShipHeadI - 1][coorShipHeadJ + 1].value == 0) this->prohibitedZone[coorShipHeadI - 1][coorShipHeadJ + 1] = 1;
-
-				if (coorShipHeadI + 1 < this->mapSizeI && coorShipHeadJ + 1 < this->mapSizeJ && this->map[coorShipHeadI + 1][coorShipHeadJ + 1].value == 0) this->prohibitedZone[coorShipHeadI + 1][coorShipHeadJ + 1] = 1;
-
-
-				if (coorShipHeadI - 1 >= 0 && this->map[coorShipHeadI - 1][coorShipHeadJ].value == 0) this->prohibitedZone[coorShipHeadI - 1][coorShipHeadJ] = 1;
-
-				if (coorShipHeadI + 1 < this->mapSizeI && this->map[coorShipHeadI + 1][coorShipHeadJ].value == 0) this->prohibitedZone[coorShipHeadI + 1][coorShipHeadJ] = 1;
-
-				if (coorShipHeadJ - 1 >= 0 && this->map[coorShipHeadI][coorShipHeadJ - 1].value == 0) this->prohibitedZone[coorShipHeadI][coorShipHeadJ - 1] = 1;
-
-				if (coorShipHeadJ + 1 < this->mapSizeJ && this->map[coorShipHeadI][coorShipHeadJ + 1].value == 0) this->prohibitedZone[coorShipHeadI][coorShipHeadJ + 1] = 1;
-
-				std::cout << "i = " << i << "j = " << j << std::endl;
-				if (this->ships[i].getDirection())
+				for (int j = 0; j < this->prohibitedZone.size(); j++)
 				{
-					for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
+					if (this->prohibitedZone[i][j] == 0)
 					{
-						for (int j = coorShipHeadJ - 1; j > coorShipHeadJ - deckAmount; j--)
-						{
-							std::cout << "i = " << i << "j = " << j << std::endl;
-
-							if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ) this->prohibitedZone[i][j] = 1;
-
-						}
+						this->nonRepeatVector.push_back(i * 10 + j);
+						//std::cout << i << " " << *(this->nonRepeatVector.end()-1) << std::endl;
 					}
-
-					//for (int j = coorShipHeadJ; j < this->ships[i].getDeckAmount() + coorShipHeadJ; j++)
-					//{
-					//	for (int k = 2; k <= deckAmount; k++)
-					//	{
-					//		if (coorShipHeadI - k >= 0)
-					//		{
-					//			this->prohibitedZone[coorShipHeadI - k][coorShipHeadJ] = 1;
-					//			if (coorShipHeadJ - 1 >= 0) this->prohibitedZone[coorShipHeadI - k][coorShipHeadJ - 1] = 1;
-					//			if (coorShipHeadJ + 1 < this->mapSizeJ) this->prohibitedZone[coorShipHeadI - k][coorShipHeadJ + 1] = 1;
-					//		}
-					//	}
-					//}
-
-					coorShipHeadJ++;
 				}
-				else
-				{
-					for (int j = coorShipHeadI; j < this->ships[i].getDeckAmount() + coorShipHeadI; j++)
-					{
-						for (int k = 2; k <= deckAmount; k++)
-						{
-							if (coorShipHeadJ - k >= 0)
-							{
-								this->prohibitedZone[coorShipHeadI][coorShipHeadJ - k] = 1;
-								if (coorShipHeadI - 1 >= 0) this->prohibitedZone[coorShipHeadI - 1][coorShipHeadJ - k] = 1;
-								if (coorShipHeadI + 1 < this->mapSizeJ) this->prohibitedZone[coorShipHeadI + 1][coorShipHeadJ - k] = 1;
-							}
-						}
-					}
-					coorShipHeadI++;
-				}
-			}*/
+			}
 
+			std::cout << " SIZEEEEE = " << this->nonRepeatVector.size() << std::endl;
 
+			if (this->nonRepeatVector.size())
+			{
+				int randomNunber = rand() % this->nonRepeatVector.size();
+				coorJ = nonRepeatVector[randomNunber] % 10;
+				coorI = (nonRepeatVector[randomNunber] - coorJ) / 10;
 
+				std::cout << " nonRepeatVector = " << nonRepeatVector[randomNunber] << " coorI = " << coorI << " j = " << coorJ << std::endl;
 
+				//if (dir && coorJ > 5) coorJ = coorJ - 4;
+				//else if (coorI > 5) coorI = coorI - 4;
 
-
-	/*for (int i = 0; i < this->nonRepeatVector.size(); i++)
-	{
-		std::cout << i << " " << this->nonRepeatVector[i] << std::endl;
-	}*/
-
-	/*int randomCoor = rand() % this->nonRepeatVector.size();
-
-	coorOfStrike.j = nonRepeatVector[randomCoor] % 10;
-	coorOfStrike.i = (nonRepeatVector[randomCoor] - coorOfStrike.j) / 10;
-
-
-	coorI = rand() % 10;
-	coorJ = rand() % 10;
-	dir = rand() % 2; //0 - vertical, 1 - horizontal,
-
-	//coorI = 3;
-	//coorJ = 3;
-	//dir = 0;
-
-	if (dir && coorJ > 5) coorJ = coorJ - 4;
-	else if (coorI > 5) coorI = coorI - 4;
-
-	this->ships.emplace_back(coorI, coorJ, dir, deckAmount);
-	this->placeShip(*(ships.end() - 1));*/
-
+				this->ships.emplace_back(coorI, coorJ, dir, deckAmount);
+				this->placeShip(*(ships.end() - 1));
+			}
+			else std::cout << "----------Placing EROR----------" << std::endl;
+		
+	}
 }
 
 void Map::randomPlace()
 {
-	this->deck1 = 0;
-	this->deck2 = 0;
-	this->deck3 = 0;
-	this->deck4 = 0;
+	this->deck1 = 1;
+	this->deck2 = 1;
+	this->deck3 = 1;
+	this->deck4 = 1;
 	this->deck5 = 4;
 
 	this->clearMap();
@@ -645,28 +593,32 @@ void Map::randomPlace()
 
 		if (this->deck5)
 		{
-			this->calcProhibitedZone(5);
+			this->calcCoordinanes(5);
 			
 			this->deck5--;
 		}
 
 		else if (this->deck4)
 		{
+			this->calcCoordinanes(4);
 			this->deck4--;
 		}
 
 		else if (this->deck3)
 		{
+			this->calcCoordinanes(3);
 			this->deck3--;
 		}
 
 		else if (this->deck2)
 		{
+			this->calcCoordinanes(2);
 			this->deck2--;
 		}
 
 		else if (this->deck1)
 		{
+			this->calcCoordinanes(1);
 			this->deck1--;
 		}
 
