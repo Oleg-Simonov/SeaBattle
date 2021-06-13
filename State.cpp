@@ -19,5 +19,5 @@ const bool State::getEndState() const
 void State::mouseUpdatePosition(sf::RenderWindow* targetWindow)
 {
 	this->mousePosWindow = sf::Mouse::getPosition(*targetWindow);
-	//std::cout << mousePosWindow.x << " " << mousePosWindow.y << std::endl;
+	std::cout << mousePosWindow.x << " " << mousePosWindow.y << std::endl;
 }

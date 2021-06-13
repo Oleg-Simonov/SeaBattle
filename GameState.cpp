@@ -10,7 +10,7 @@ GameState::GameState(std::stack<State*>* statesPointer, Map* playerMap) : State(
 	this->needComeBack = 0;
 
 	//this->playerMap = playerMap;
-	this->playerMap = new Map();
+	this->playerMap = new Map(100, 100);
 	this->playerMove = true;
 
 	//init font

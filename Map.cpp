@@ -1,16 +1,10 @@
 #include "Map.h"
 
 //Map for player
-Map::Map() : prohibitedZone(10, std::vector<int>(10, 0))
+Map::Map(float coorWindI, float coorWindJ) : prohibitedZone(10, std::vector<int>(10, 0))
 {
 	std::cout << std::endl;
 	std::cout << "----------Map Construcror1----------" << std::endl;
-
-	this->deck1 = 1;
-	this->deck2 = 1;
-	this->deck3 = 1;
-	this->deck4 = 1;
-	this->deck5 = 1;
 
 	int coorI = 0;
 	int coorJ = 0;
@@ -19,7 +13,7 @@ Map::Map() : prohibitedZone(10, std::vector<int>(10, 0))
 	this->shipsAmount = 0;
 	this->mapSizeI = 10;
 	this->mapSizeJ = 10;
-	this->ships.reserve(5);
+	this->ships.reserve(15);
 
 	this->map.resize(mapSizeI);
 	for (int i = 0; i < this->mapSizeI; i++)
@@ -32,7 +26,7 @@ Map::Map() : prohibitedZone(10, std::vector<int>(10, 0))
 			this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Blue);
 			this->map[i][j].shapeForPlayer.setOutlineThickness(1.f);
 			this->map[i][j].shapeForPlayer.setOutlineColor(sf::Color::Black);
-			this->map[i][j].shapeForPlayer.setPosition(sf::Vector2f(30.f + j * 29, 50.f + i * 29));
+			this->map[i][j].shapeForPlayer.setPosition(sf::Vector2f(coorWindI + j * 29, coorWindJ + i * 29));
 		}
 	}
 	
@@ -212,6 +206,14 @@ int Map::getCurrentShipsAmount() const
 	return this->currentShipsAmount;
 }
 
+int Map::getProhibitedZoneIJ(int i, int j) const
+{
+	//std::cout << i << " " << j << std::endl;
+	if (i >= 0 && i < this->mapSizeI  && j >=0 && j < this->mapSizeJ)
+		return this->prohibitedZone[i][j];
+	else return -1;
+}
+
 std::vector<Ship>::const_iterator Map::getShips() const
 {
 	return this->ships.begin();
@@ -219,7 +221,7 @@ std::vector<Ship>::const_iterator Map::getShips() const
 
 void Map::updateMap(const sf::RenderWindow* window)
 {
-
+	
 	for (int i = 0; i < this->getSizeI(); i++)
 	{
 		for (int j = 0; j < this->getSizeJ(); j++)
@@ -240,7 +242,6 @@ void Map::updateMap(const sf::RenderWindow* window)
 
 void Map::updateMap(const sf::RenderWindow* window, bool enemy)
 {
-
 	for (int i = 0; i < this->getSizeI(); i++)
 	{
 		for (int j = 0; j < this->getSizeJ(); j++)
@@ -286,6 +287,195 @@ void Map::renderMap(sf::RenderWindow* targetWindow) const
 	}
 }
 
+void Map::showProhibitedZone()
+{
+	for (int i = 0; i < this->prohibitedZone.size(); i++)
+	{
+		for (int j = 0; j < this->prohibitedZone.size(); j++)
+		{
+			std::cout << this->prohibitedZone[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+void Map::calcProhibitedZone(bool dir, int deckAmount)
+{
+	//calculate prohibited zone-------------------------------------------
+	for (int i = 0; i < this->prohibitedZone.size(); i++)
+	{
+		for (int j = 0; j < this->prohibitedZone.size(); j++)
+		{
+			this->prohibitedZone[i][j] = 0;
+			//std::cout << this->prohibitedZone[i][j] << " ";
+		}
+		//std::cout << std::endl;
+	}
+
+	//std::cout << std::endl;
+
+	if (dir) //new ship is gonna be horizontal
+	{
+		//prohibited zone by bounds of map
+		for (int i = 0; i < this->mapSizeI; i++)
+		{
+			for (int j = this->mapSizeJ - deckAmount + 1; j < this->mapSizeJ; j++)
+			{
+					this->prohibitedZone[i][j] = 9;
+			}
+		}
+
+		//prohibited zone by ships
+		for (int shipCounter = 0; shipCounter < this->ships.size(); shipCounter++)
+		{
+			int coorShipHeadI = this->ships[shipCounter].getI();
+			int coorShipHeadJ = this->ships[shipCounter].getJ();
+
+			if (this->ships[shipCounter].getDirection()) //ship [i] is horizontal
+			{
+				for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
+				{
+					for (int j = coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); j >= coorShipHeadJ - deckAmount; j--)
+					{
+						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ && this->prohibitedZone[i][j] != 2) this->prohibitedZone[i][j] = 1;
+						
+						//if (i == coorShipHeadI && j == coorShipHeadJ) for (int k = coorShipHeadJ; k < coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); k++) this->prohibitedZone[i][k] = 2; //for debug (determination of ship position)
+					}
+				}
+			}
+			else //ship [i] is vertical
+			{
+				for (int i = coorShipHeadI - 1; i <= coorShipHeadI + this->ships[shipCounter].getDeckAmount(); i++)
+				{
+					for (int j = coorShipHeadJ + 1 ; j >= coorShipHeadJ - deckAmount; j--)
+					{
+						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ && this->prohibitedZone[i][j] != 2) this->prohibitedZone[i][j] = 1;
+
+						//if (i == coorShipHeadI && j == coorShipHeadJ) for (int k = coorShipHeadI; k < coorShipHeadI + this->ships[shipCounter].getDeckAmount(); k++) this->prohibitedZone[k][j] = 2; //for debug (determination of ship position)
+					}
+				}
+			}
+		}
+		//showProhibitedZone(); // for debug
+	}
+	else //new ship is gonna be vertical--------------------------------------------------------------------------------------------------------------------------------------------
+	{
+		//prohibited zone by bounds of map
+		for (int i = this->mapSizeJ - deckAmount + 1; i < this->mapSizeI; i++)
+		{
+			for (int j = 0; j < this->mapSizeJ; j++)
+			{
+				this->prohibitedZone[i][j] = 9;
+			}
+		}
+
+		//prohibited zone by ships
+		for (int shipCounter = 0; shipCounter < this->ships.size(); shipCounter++)
+		{
+			int coorShipHeadI = this->ships[shipCounter].getI();
+			int coorShipHeadJ = this->ships[shipCounter].getJ();
+
+			if (this->ships[shipCounter].getDirection()) //ship [i] is horizontal
+			{
+				for (int i = coorShipHeadI + 1; i >= coorShipHeadI - deckAmount; i--)
+				{
+					for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); j++)
+					{
+						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ && this->prohibitedZone[i][j] != 2) this->prohibitedZone[i][j] = 1;
+
+						//if (i == coorShipHeadI && j == coorShipHeadJ) for (int k = coorShipHeadJ; k < coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); k++) this->prohibitedZone[i][k] = 2; //for debug (determination of ship position)
+					}
+				}
+			}
+			else //ship [i] is vertical
+			{
+				for (int i = coorShipHeadI + this->ships[shipCounter].getDeckAmount(); i >= coorShipHeadI - deckAmount; i--)
+				{
+					for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + 1; j++)
+					{
+						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ && this->prohibitedZone[i][j] != 2) this->prohibitedZone[i][j] = 1;
+
+						if (i == coorShipHeadI && j == coorShipHeadJ) for (int k = coorShipHeadI; k < coorShipHeadI + this->ships[shipCounter].getDeckAmount(); k++) this->prohibitedZone[k][j] = 2; //for debug (determination of ship position)
+					}
+				}
+			}
+		}
+		//showProhibitedZone(); // for debug
+	}
+}
+
+bool Map::calcCoordinanes(bool dir, int deckAmount)
+{
+	std::cout << "na4alo" << " dir = " << dir << std::endl;
+
+	calcProhibitedZone(dir, deckAmount);
+
+
+	//calculate coordinates of head of ship-------------------------------
+	this->nonRepeatVector.clear();
+
+	for (int i = 0; i < this->prohibitedZone.size(); i++)
+	{
+		for (int j = 0; j < this->prohibitedZone.size(); j++)
+		{
+			if (this->prohibitedZone[i][j] == 0)
+			{
+				this->nonRepeatVector.push_back(i * 10 + j);
+				//std::cout << i << " " << *(this->nonRepeatVector.end()-1) << std::endl;
+			}
+		}
+	}
+
+	if (this->nonRepeatVector.size())
+	{
+		int randomNunber = rand() % this->nonRepeatVector.size();
+		coorJ = nonRepeatVector[randomNunber] % 10;
+		coorI = (nonRepeatVector[randomNunber] - coorJ) / 10;
+
+		std::cout << " nonRepeatVector = " << nonRepeatVector[randomNunber] << " coorI = " << coorI << " j = " << coorJ << std::endl;
+
+		//if (dir && coorJ > 5) coorJ = coorJ - 4;
+		//else if (coorI > 5) coorI = coorI - 4;
+
+		this->ships.emplace_back(coorI, coorJ, dir, deckAmount);
+		this->placeShip(*(ships.end() - 1));
+		return 1;
+	}
+	else return 0;
+}
+
+void Map::randomPlace()
+{
+	int shipsForRandPlacing[5];
+	shipsForRandPlacing[0] = 3;	//1 deck
+	shipsForRandPlacing[1] = 3; //2 deck
+	shipsForRandPlacing[2] = 2; //3 deck
+	shipsForRandPlacing[3] = 1; //4 deck
+	shipsForRandPlacing[4] = 0; //5 deck
+
+	this->clearMap();
+
+	for (int i = 4; i >= 0; i--)
+	{
+		while (shipsForRandPlacing[i])
+		{
+			std::cout << "sum " << shipsForRandPlacing[0] + shipsForRandPlacing[1] + shipsForRandPlacing[2] + shipsForRandPlacing[3] + shipsForRandPlacing[4] << std::endl;
+			int dir = rand() % 2; //0 - vertical, 1 - horizontal
+			shipsForRandPlacing[i]--;
+			if (!calcCoordinanes(dir, i + 1))
+			{
+				if (!calcCoordinanes(!dir, i + 1))
+				{
+					std::cout << "Placing ERROR " << i + 1 << std::endl;
+					i = 0;
+					break;
+				}
+			}
+		}
+	}
+}
+
 void Map::placeShip(const Ship& ship) //for computer's ships
 {
 	if (ship.getDirection() == true) //горизонтально
@@ -307,412 +497,24 @@ void Map::placeShip(const Ship& ship) //for computer's ships
 	this->shipsAmount++;
 }
 
-void Map::calcProhibitedZone(int deckAmount)
-{
-	//calculate prohibited zone-------------------------------------------
-	for (int i = 0; i < this->prohibitedZone.size(); i++)
-	{
-		for (int j = 0; j < this->prohibitedZone.size(); j++)
-		{
-			this->prohibitedZone[i][j] = 0;
-			//std::cout << this->prohibitedZone[i][j] << " ";
-		}
-		//std::cout << std::endl;
-	}
-
-	std::cout << std::endl;
-	
-	if (dir) //new ship is gonna be horizontal
-	{
-		//prohibited zone by bounds of map
-		for (int i = 0; i < this->mapSizeI; i++)
-		{
-			for (int j = this->mapSizeJ - deckAmount + 1; j < this->mapSizeJ; j++)
-			{
-					this->prohibitedZone[i][j] = 9;
-			}
-		}
-
-		//prohibited zone by ships
-		for (int shipCounter = 0; shipCounter < this->ships.size(); shipCounter++)
-		{
-			int coorShipHeadI = this->ships[shipCounter].getI();
-			int coorShipHeadJ = this->ships[shipCounter].getJ();
-
-			//prohibited zone around ship
-			if (this->ships[shipCounter].getDirection()) //ship [i] is horizontal
-			{
-				for (int deckCounter = 0; deckCounter < this->ships[shipCounter].getDeckAmount(); deckCounter++)
-				{
-					for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
-					{
-						for (int j = coorShipHeadJ - 1 + deckCounter; j <= coorShipHeadJ + 1 + deckCounter; j++)
-						{
-							this->prohibitedZone[coorShipHeadI][coorShipHeadJ + deckCounter] = 2;
-							if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ && this->prohibitedZone[i][j] == 0) this->prohibitedZone[i][j] = 1;
-						}
-					}
-				}
-
-				for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
-				{
-					for (int j = coorShipHeadJ - 1; j >= coorShipHeadJ - deckAmount; j--)
-					{
-						//std::cout << "i = " << i << "j = " << j << std::endl;
-
-						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ) 
-						this->prohibitedZone[i][j] = 7;
-
-					}
-				}
-			}
-			else //ship [i] is vertical
-			{
-				for (int deckCounter = 0; deckCounter < this->ships[shipCounter].getDeckAmount(); deckCounter++)
-				{
-					for (int i = coorShipHeadI - 1 + deckCounter; i <= coorShipHeadI + 1 + deckCounter; i++)
-					{
-						for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + 1; j++)
-						{
-							this->prohibitedZone[coorShipHeadI + deckCounter][coorShipHeadJ] = 2;
-							if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ && this->prohibitedZone[i][j] == 0) this->prohibitedZone[i][j] = 1;
-						}
-					}
-				}
-
-				for (int i = coorShipHeadI - 1; i <= coorShipHeadI + this->ships[shipCounter].getDeckAmount() /*&& i >= 0 && i < this->mapSizeI*/; i++)
-				{
-					for (int j = coorShipHeadJ - 1; j >= coorShipHeadJ - deckAmount /*&& j >= 0 && j < this->mapSizeJ*/; j--)
-					{
-						//std::cout << "i = " << i << "j = " << j << std::endl;
-
-						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ) 
-						this->prohibitedZone[i][j] = 7;
-
-					}
-				}
-			}
-
-			for (int j = 0; j < this->prohibitedZone.size(); j++)
-			{
-				for (int k = 0; k < this->prohibitedZone.size(); k++)
-				{
-					std::cout << this->prohibitedZone[j][k] << " ";
-				}
-				std::cout << std::endl;
-			}
-			std::cout << std::endl;
-		}
-	}
-	else //new ship is gonna be vertical--------------------------------------------------------------------------------------------------------------------------------------------
-	{
-		//prohibited zone by bounds of map
-		for (int i = this->mapSizeJ - deckAmount + 1; i < this->mapSizeI; i++)
-		{
-			for (int j = 0; j < this->mapSizeJ; j++)
-			{
-				this->prohibitedZone[i][j] = 9;
-			}
-		}
-
-		//prohibited zone by ships
-		for (int shipCounter = 0; shipCounter < this->ships.size(); shipCounter++)
-		{
-			int coorShipHeadI = this->ships[shipCounter].getI();
-			int coorShipHeadJ = this->ships[shipCounter].getJ();
-
-			//prohibited zone around ship
-			if (this->ships[shipCounter].getDirection()) //ship [i] is horizontal
-			{
-				for (int deckCounter = 0; deckCounter < this->ships[shipCounter].getDeckAmount(); deckCounter++)
-				{
-					for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
-					{
-						for (int j = coorShipHeadJ - 1 + deckCounter; j <= coorShipHeadJ + 1 + deckCounter; j++)
-						{
-							this->prohibitedZone[coorShipHeadI][coorShipHeadJ + deckCounter] = 2;
-							if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ && this->prohibitedZone[i][j] == 0) this->prohibitedZone[i][j] = 1;
-						}
-					}
-				}
-
-				for (int i = coorShipHeadI - 1; i >= coorShipHeadI - deckAmount; i--)
-				{
-					for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); j++)
-					{
-						//std::cout << "i = " << i << "j = " << j << std::endl;
-
-						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ) 
-						this->prohibitedZone[i][j] = 7;
-
-					}
-				}
-			}
-			else //ship [i] is vertical
-			{
-				for (int deckCounter = 0; deckCounter < this->ships[shipCounter].getDeckAmount(); deckCounter++)
-				{
-					for (int i = coorShipHeadI - 1 + deckCounter; i <= coorShipHeadI + 1 + deckCounter; i++)
-					{
-						for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + 1; j++)
-						{
-							this->prohibitedZone[coorShipHeadI + deckCounter][coorShipHeadJ] = 2;
-							if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ && this->prohibitedZone[i][j] == 0) this->prohibitedZone[i][j] = 1;
-						}
-					}
-				}
-
-				for (int i = coorShipHeadI - 1; i >= coorShipHeadI - deckAmount; i--)
-				{
-					for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + 1; j++)
-					{
-						//std::cout << "i = " << i << "j = " << j << std::endl;
-
-						if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
-							this->prohibitedZone[i][j] = 7;
-
-					}
-				}
-			}
-		}
-		for (int j = 0; j < this->prohibitedZone.size(); j++)
-		{
-			for (int k = 0; k < this->prohibitedZone.size(); k++)
-			{
-				std::cout << this->prohibitedZone[j][k] << " ";
-			}
-			std::cout << std::endl;
-		}
-		std::cout << std::endl;
-	}
-
-
-}
-
-void Map::calcCoordinanes(int deckAmount)
-{
-	dir = rand() % 2; //0 - vertical, 1 - horizontal
-	/*if (this->ships.size())
-	{
-		dir = 0;
-	}
-	else dir = 1;*/
-
-	std::cout << "na4alo" << " dir = " << dir << std::endl;
-
-	calcProhibitedZone(deckAmount);
-
-
-	//calculate coordinates of head of ship-------------------------------
-	this->nonRepeatVector.clear();
-
-	for (int i = 0; i < this->prohibitedZone.size(); i++)
-	{
-		for (int j = 0; j < this->prohibitedZone.size(); j++)
-		{
-			if (this->prohibitedZone[i][j] == 0)
-			{
-				this->nonRepeatVector.push_back(i * 10 + j);
-				//std::cout << i << " " << *(this->nonRepeatVector.end()-1) << std::endl;
-			}
-		}
-	}
-
-	
-		std::cout << " SIZEEEEE = " << this->nonRepeatVector.size() << std::endl;
-
-	if (this->nonRepeatVector.size())
-	{
-		int randomNunber = rand() % this->nonRepeatVector.size();
-		coorJ = nonRepeatVector[randomNunber] % 10;
-		coorI = (nonRepeatVector[randomNunber] - coorJ) / 10;
-
-		std::cout << " nonRepeatVector = " << nonRepeatVector[randomNunber] << " coorI = " << coorI << " j = " << coorJ << std::endl;
-
-		//if (dir && coorJ > 5) coorJ = coorJ - 4;
-		//else if (coorI > 5) coorI = coorI - 4;
-
-		this->ships.emplace_back(coorI, coorJ, dir, deckAmount);
-		this->placeShip(*(ships.end() - 1));
-	}
-	else
-	{
-			dir = !dir;
-			std::cout << "----------RESTART------------" << std::endl;
-			calcProhibitedZone(deckAmount);
-
-			//calculate coordinates of head of ship-------------------------------
-			this->nonRepeatVector.clear();
-
-			for (int i = 0; i < this->prohibitedZone.size(); i++)
-			{
-				for (int j = 0; j < this->prohibitedZone.size(); j++)
-				{
-					if (this->prohibitedZone[i][j] == 0)
-					{
-						this->nonRepeatVector.push_back(i * 10 + j);
-						//std::cout << i << " " << *(this->nonRepeatVector.end()-1) << std::endl;
-					}
-				}
-			}
-
-			std::cout << " SIZEEEEE = " << this->nonRepeatVector.size() << std::endl;
-
-			if (this->nonRepeatVector.size())
-			{
-				int randomNunber = rand() % this->nonRepeatVector.size();
-				coorJ = nonRepeatVector[randomNunber] % 10;
-				coorI = (nonRepeatVector[randomNunber] - coorJ) / 10;
-
-				std::cout << " nonRepeatVector = " << nonRepeatVector[randomNunber] << " coorI = " << coorI << " j = " << coorJ << std::endl;
-
-				//if (dir && coorJ > 5) coorJ = coorJ - 4;
-				//else if (coorI > 5) coorI = coorI - 4;
-
-				this->ships.emplace_back(coorI, coorJ, dir, deckAmount);
-				this->placeShip(*(ships.end() - 1));
-			}
-			else std::cout << "----------Placing EROR----------" << std::endl;
-		
-	}
-}
-
-void Map::randomPlace()
-{
-	this->deck1 = 1;
-	this->deck2 = 1;
-	this->deck3 = 1;
-	this->deck4 = 1;
-	this->deck5 = 4;
-
-	this->clearMap();
-
-	while(this->deck1 + this->deck2 + this->deck3 + this->deck4 + this->deck5)
-	{
-		std::cout << "sum "<< this->deck1 + this->deck2 + this->deck3 + this->deck4 + this->deck5 << std::endl;
-
-		if (this->deck5)
-		{
-			this->calcCoordinanes(5);
-			
-			this->deck5--;
-		}
-
-		else if (this->deck4)
-		{
-			this->calcCoordinanes(4);
-			this->deck4--;
-		}
-
-		else if (this->deck3)
-		{
-			this->calcCoordinanes(3);
-			this->deck3--;
-		}
-
-		else if (this->deck2)
-		{
-			this->calcCoordinanes(2);
-			this->deck2--;
-		}
-
-		else if (this->deck1)
-		{
-			this->calcCoordinanes(1);
-			this->deck1--;
-		}
-
-		else std::cout << "???" << std::endl;
-
-	}
-}
-
-void Map::placeShip(int coorI, int coorJ, bool dir, int deckAmount)
-{
-	this->ships.emplace_back(coorI, coorJ, dir, deckAmount);
-	this->placeShip(*(ships.end()-1));
-
-		/*for (int i = 0; i < deckAmount; i++)
-		{
-			if (coorI - 1 >= 0 && coorJ - 1 >= 0 && this->map[coorI - 1][coorJ- 1].value == 0) this->map[coorI - 1][coorJ - 1].value = 3;
-
-			if (coorI + 1 < this->mapSizeI && coorJ - 1 >= 0 && this->map[coorI + 1][coorJ - 1].value == 0) this->map[coorI + 1][coorJ - 1].value = 3;
-
-			if (coorI - 1 >= 0 && coorJ + 1 < this->mapSizeJ && this->map[coorI - 1][coorJ + 1].value == 0) this->map[coorI - 1][coorJ + 1].value = 3;
-
-			if (coorI + 1 < this->mapSizeI && coorJ + 1 < this->mapSizeJ && this->map[coorI + 1][coorJ + 1].value == 0) this->map[coorI + 1][coorJ + 1].value = 3;
-
-
-
-			if (coorI - 1 >= 0 && this->map[coorI - 1][coorJ].value == 0) this->map[coorI - 1][coorJ].value = 3;
-
-			if (coorI + 1 < this->mapSizeI && this->map[coorI + 1][coorJ].value == 0) this->map[coorI + 1][coorJ].value = 3;
-
-			if (coorJ - 1 >= 0 && this->map[coorI][coorJ - 1].value == 0) this->map[coorI][coorJ - 1].value = 3;
-
-			if (coorJ + 1 < this->mapSizeJ && this->map[coorI][coorJ + 1].value == 0) this->map[coorI][coorJ + 1].value = 3;
-			
-			if (dir)
-			{
-				coorJ++;
-			}
-			else
-			{
-				coorI++;
-			}
-		}*/
-}
-
 bool Map::placeShip(const OutMapShip& outMapShip, const sf::RenderWindow* window) //for player's ships
 {
-	//determination ship's coordinates in depending on cursor location
-	int shipHeadI = 1000;
-	int shipHeadJ = 1000;
+	int number = this->determinationChosenMapField(window);
 
-	for (int i = 0; i < this->getSizeI(); i++)
+	if (number < 100)
 	{
-		for (int j = 0; j < this->getSizeJ(); j++)
+		this->calcProhibitedZone(outMapShip.getDirection(), outMapShip.getDeckAmount());
+		int coorJ = number % 10;
+		int coorI = (number - coorJ) / 10;
+		if (this->prohibitedZone[coorI][coorJ] == 0)
 		{
-			if (this->map[i][j].shapeForPlayer.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
-			{
-				shipHeadI = i;
-				shipHeadJ = j;
-				std::cout << "shipHeadI " << shipHeadI << "   shipHeadJ " << shipHeadJ << std::endl;
-			}
+			this->ships.emplace_back(coorI, coorJ, outMapShip.getDirection(), outMapShip.getDeckAmount());
+			this->placeShip(*(ships.end() - 1));
+			return 1;
 		}
+		else return 0;
 	}
-
-	if ((shipHeadI < this->getSizeI()) && (shipHeadJ < this->getSizeJ())) //out of range protection
-	{
-		if (outMapShip.getDirection() == true) //горизонтально
-		{
-			if (shipHeadJ + outMapShip.getDeckAmount() <= this->getSizeJ()) //out of range protection
-			{
-				for (int j = shipHeadJ; j < shipHeadJ + outMapShip.getDeckAmount(); j++)
-				{
-					this->map[shipHeadI][j].value = 1;
-					this->map[shipHeadI][j].shapeForPlayer.setFillColor(sf::Color::White);
-				}
-			}
-			else return false;
-		}
-		else // вертикально
-		{
-			if (shipHeadI + outMapShip.getDeckAmount() <= this->getSizeI()) //out of range protection
-			{
-				for (int i = shipHeadI; i < shipHeadI + outMapShip.getDeckAmount(); i++)
-				{
-					this->map[i][shipHeadJ].value = 1;
-						this->map[i][shipHeadJ].shapeForPlayer.setFillColor(sf::Color::White);
-				}
-			}
-			else return false;
-		}
-		return true;
-		this->shipsAmount++;
-	}
-	else return false;
-	
+	else return 0;
 }
 
 
@@ -815,3 +617,28 @@ Map::PieceOfMap::PieceOfMap()
 Map::PieceOfMap::~PieceOfMap()
 {
 }
+
+
+int Map::determinationChosenMapField(const sf::RenderWindow* const window)
+{
+	//determination Chosen Map Field in depending on cursor location
+	int shipHeadI = 1000;
+	int shipHeadJ = 1000;
+	int chosenField[] = {-1,-1};
+
+	for (int i = 0; i < this->getSizeI(); i++)
+	{
+		for (int j = 0; j < this->getSizeJ(); j++)
+		{
+			if (this->map[i][j].shapeForPlayer.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
+			{
+				shipHeadI = i;
+				shipHeadJ = j;
+				//std::cout << "shipHeadI " << shipHeadI << "   shipHeadJ " << shipHeadJ << std::endl;
+			}
+		}
+	}
+
+	return shipHeadI * 10 + shipHeadJ;
+}
+

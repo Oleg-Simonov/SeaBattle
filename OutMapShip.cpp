@@ -73,25 +73,41 @@ void OutMapShip::setDirection()
 
 }
 
-void OutMapShip::update(sf::RenderWindow* window)
+void OutMapShip::update(sf::RenderWindow* window, int prohibitedZoneValue)
 {
+
+    //std::cout << prohibitedZoneValue << std::endl;
 
     if (grab)
     {
         //std::cout << this->deckAmount << std::endl;
 
             this->shape.setPosition((float)sf::Mouse::getPosition(*window).x - 15, (float)sf::Mouse::getPosition(*window).y - 15);
+
             if (direction)
                 this->shape.setSize(sf::Vector2f(27.f * this->deckAmount, 27.f));
             else
                 this->shape.setSize(sf::Vector2f(27.f, 27.f * this->deckAmount));
     }
+    else
+    {
+
+        this->shape.setPosition(this->windowCoorX, this->windowCoorY);
+        this->shape.setFillColor(sf::Color::White);
+    }
  
     if (this->shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
-            this->shape.setFillColor(sf::Color::Cyan);
-    else
-            this->shape.setPosition(this->windowCoorX, this->windowCoorY);
-            this->shape.setFillColor(sf::Color::White);
+    {
+        if (prohibitedZoneValue == 0) this->shape.setFillColor(sf::Color::Green);
+        else if (prohibitedZoneValue == -1) this->shape.setFillColor(sf::Color::Cyan);
+        else this->shape.setFillColor(sf::Color::Red);
+    }
+
+    /*if (this->shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
+            this->shape.setFillColor(sf::Color::Cyan);*/
+
+    //if (color == 1) this->shape.setFillColor(sf::Color::Red);
+//if (color == 2) this->shape.setFillColor(sf::Color::Green);
 }
 
 void OutMapShip::render(sf::RenderWindow* window)

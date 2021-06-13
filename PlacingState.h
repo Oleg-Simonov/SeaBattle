@@ -1,6 +1,7 @@
 #pragma once
 #include <Map>
 #include <string>
+#include <sstream>
 #include "State.h"
 #include "GameState.h"
 
@@ -9,10 +10,13 @@ class PlacingState :
 {
 private:
     sf::Font font;
-    sf::Text infoText;
-    Map playerMap;
+    sf::Text headerText;
+    sf::Text helpText;
+    sf::Text yourMapText;
+    sf::Text yourShipsText;
+    Map playerMap = Map(30, 100);
 
-    int deck1, deck2, deck3, deck4, deck5;
+    //int deck1, deck2, deck3, deck4, deck5;
 
     std::map<std::string, Button*> buttons2;
 

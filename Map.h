@@ -24,8 +24,7 @@ private:
 
 
 	int coorI, coorJ;
-	bool dir;
-	int deck1, deck2, deck3, deck4, deck5;
+
 	int mapSizeI, mapSizeJ;
 	int currentShipsAmount, shipsAmount;
 
@@ -42,7 +41,7 @@ private:
 	std::vector<Ship> ships;
 
 public:
-	Map();
+	Map(float coorWindI, float coorWindJ);
 	Map(bool enemy);
 
 	int getSizeI() const;
@@ -52,12 +51,17 @@ public:
 	//sf::RectangleShape getMapValue(int i, int j) const;
 	int getShipsAmount() const;
 	int getCurrentShipsAmount() const;
+	int getProhibitedZoneIJ(int i, int j) const;
 	std::vector<Ship>::const_iterator getShips() const;
 
-	void calcProhibitedZone(int deckAmount);
-	void calcCoordinanes(int deckAmount);
+	void showProhibitedZone();
+	void calcProhibitedZone(bool dir, int deckAmount);
+
+	bool calcCoordinanes(bool dir, int deckAmount);
 	void randomPlace();
-	void placeShip(int coorI, int coorJ, bool dir, int deckAmount);
+
+
+
 	void placeShip(const Ship& ship);
 	bool placeShip(const OutMapShip& ship, const sf::RenderWindow* window);
 	int attack(const sf::RenderWindow* window, int attackI = 1000, int attackJ = 1000); //if attackI and attackJ are exist then computer attacks player's map
@@ -66,5 +70,7 @@ public:
 	void updateMap(const sf::RenderWindow* window);
 	void updateMap(const sf::RenderWindow* window, bool enemy);
 	void renderMap(sf::RenderWindow* targetWindow) const;
+
+	int determinationChosenMapField(const sf::RenderWindow* const window);
 };
 
