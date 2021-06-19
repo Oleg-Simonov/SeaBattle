@@ -1,11 +1,14 @@
 #include "Map.h"
 
 //Map for player
-Map::Map(float coorWindI, float coorWindJ) : prohibitedZone(10, std::vector<int>(10, 0))
+Map::Map(float coorWindX, float coorWindY, bool enemy) : prohibitedZone(10, std::vector<int>(10, 0))
 {
 	std::cout << std::endl;
 	std::cout << "----------Map Construcror1----------" << std::endl;
 
+	//init font
+	if (!this->font.loadFromFile("Fonts\\font.ttf"))	std::cout << "FontMap error" << std::endl; //should be refined
+	
 	int coorI = 0;
 	int coorJ = 0;
 	bool dir = 1;
@@ -15,6 +18,11 @@ Map::Map(float coorWindI, float coorWindJ) : prohibitedZone(10, std::vector<int>
 	this->mapSizeJ = 10;
 	this->ships.reserve(15);
 
+	int scale = 29;
+	int textSize = 17;
+
+	this->text12345.resize(mapSizeI);
+	this->textABCDE.resize(mapSizeJ);
 	this->map.resize(mapSizeI);
 	for (int i = 0; i < this->mapSizeI; i++)
 	{
@@ -26,23 +34,51 @@ Map::Map(float coorWindI, float coorWindJ) : prohibitedZone(10, std::vector<int>
 			this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Blue);
 			this->map[i][j].shapeForPlayer.setOutlineThickness(1.f);
 			this->map[i][j].shapeForPlayer.setOutlineColor(sf::Color::Black);
-			this->map[i][j].shapeForPlayer.setPosition(sf::Vector2f(coorWindI + j * 29, coorWindJ + i * 29));
+			this->map[i][j].shapeForPlayer.setPosition(sf::Vector2f(coorWindX + textSize + j * scale, coorWindY + (textSize + 5) + i * scale));
+			this->map[i][j].shapeForPlayer.getPosition();
+
+			/*if (enemy)
+			{
+				this->map[i][j].shapeForDebug.setSize(sf::Vector2f(27.f, 27.f));
+				this->map[i][j].shapeForDebug.setFillColor(sf::Color::Blue);
+				this->map[i][j].shapeForDebug.setOutlineThickness(1.f);
+				this->map[i][j].shapeForDebug.setOutlineColor(sf::Color::Black);
+				this->map[i][j].shapeForDebug.setPosition(sf::Vector2f(430.f + j * 29, 550.f + i * 29));
+			}*/
 		}
+
+		text12345[i].setFont(font);
+		text12345[i].setCharacterSize(textSize);
+		text12345[i].setPosition(sf::Vector2f(coorWindX, this->map[i][0].shapeForPlayer.getPosition().y + 3));
+		text12345[i].setString(std::to_string(i));
+
+		textABCDE[i].setFont(font);
+		textABCDE[i].setCharacterSize(textSize);
+		textABCDE[i].setPosition(sf::Vector2f(this->map[0][i].shapeForPlayer.getPosition().x + 7, coorWindY));
+		char ch = 65 + i;
+		textABCDE[i].setString(ch);
 	}
+
+	//	//Карта 1
+	if (enemy)
+	{
+		this->randomPlace();
+		/*this->ships.emplace_back(1, 3, true, 5);
+		this->ships.emplace_back(5, 3, true, 3);
+		this->ships.emplace_back(1, 1, false, 3);
+		this->ships.emplace_back(8, 8, true, 2);
+		this->ships.emplace_back(8, 6, false, 1);
+
+		this->placeShip(ships[0]);
+		this->placeShip(ships[1]);
+		this->placeShip(ships[2]);
+		this->placeShip(ships[3]);
+		this->placeShip(ships[4]);
+
+		this->currentShipsAmount = this->shipsAmount;*/
+	}
+
 	
-/*this->ships.emplace_back(3, 7, false, 5);
-this->ships.emplace_back(1, 1, true, 3);
-this->ships.emplace_back(4, 1, true, 4);
-this->ships.emplace_back(7, 2, true, 3);
-this->ships.emplace_back(9, 0, false, 1);*/
-
-/*
-this->ships.emplace_back(5, 0, true, 5);
-this->ships.emplace_back(5, 5, true, 1);
-this->ships.emplace_back(5, 5, true, 1);
-this->ships.emplace_back(5, 5, true, 1);
-this->ships.emplace_back(5, 5, false, 1);*/
-
 	/*
 	this->ships.emplace_back(2, 0, true, 5);
 this->ships.emplace_back(0, 0, true, 4);
@@ -67,103 +103,6 @@ this->currentShipsAmount = this->ships.size();*/
 	std::cout << std::endl;
 }
 
-Map::Map(bool enemy)
-{
-	std::cout << std::endl;
-	std::cout << "----------Map Construcror2----------" << std::endl;
-
-	this->shipsAmount = 0;
-	this->mapSizeI = 10;
-	this->mapSizeJ = 10;
-	this->ships.reserve(5);
-
-	this->map.resize(mapSizeI);
-	for (int i = 0; i < this->mapSizeI; i++)
-	{
-		this->map[i].resize(mapSizeJ);
-		for (int j = 0; j < this->mapSizeJ; j++)
-		{
-			this->map[i][j].value = 0;
-
-			this->map[i][j].shapeForPlayer.setSize(sf::Vector2f(27.f, 27.f));
-			this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Blue);
-			this->map[i][j].shapeForPlayer.setOutlineThickness(1.f);
-			this->map[i][j].shapeForPlayer.setOutlineColor(sf::Color::Black);
-			this->map[i][j].shapeForPlayer.setPosition(sf::Vector2f(430.f + j * 29, 50.f + i * 29));
-
-			this->map[i][j].shapeForDebug.setSize(sf::Vector2f(27.f, 27.f));
-			this->map[i][j].shapeForDebug.setFillColor(sf::Color::Blue);
-			this->map[i][j].shapeForDebug.setOutlineThickness(1.f);
-			this->map[i][j].shapeForDebug.setOutlineColor(sf::Color::Black);
-			this->map[i][j].shapeForDebug.setPosition(sf::Vector2f(430.f + j * 29, 550.f + i * 29));
-		}
-	}
-
-	this->map.resize(mapSizeI);
-	for (int i = 0; i < this->mapSizeI; i++)
-	{
-		this->map[i].resize(mapSizeJ);
-		for (int j = 0; j < this->mapSizeJ; j++)
-		{
-			this->map[i][j].value = 0;
-
-			this->map[i][j].shapeForPlayer.setSize(sf::Vector2f(27.f, 27.f));
-			this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Blue);
-			this->map[i][j].shapeForPlayer.setOutlineThickness(1.f);
-			this->map[i][j].shapeForPlayer.setOutlineColor(sf::Color::Black);
-			this->map[i][j].shapeForPlayer.setPosition(sf::Vector2f(430.f + j * 29, 50.f + i * 29));
-
-			this->map[i][j].shapeForDebug.setSize(sf::Vector2f(27.f, 27.f));
-			this->map[i][j].shapeForDebug.setFillColor(sf::Color::Blue);
-			this->map[i][j].shapeForDebug.setOutlineThickness(1.f);
-			this->map[i][j].shapeForDebug.setOutlineColor(sf::Color::Black);
-			this->map[i][j].shapeForDebug.setPosition(sf::Vector2f(430.f + j * 29, 550.f + i * 29));
-		}
-	}
-	//Карта 1
-	/*this->ships.emplace_back(1, 3, true, 5);
-	this->ships.emplace_back(5, 3, true, 3);
-	this->ships.emplace_back(1, 1, false, 3);
-	this->ships.emplace_back(8, 8, true, 2);
-	this->ships.emplace_back(8, 6, false, 1);
-
-	this->placeShip(ships[0]);
-	this->placeShip(ships[1]);
-	this->placeShip(ships[2]);
-	this->placeShip(ships[3]);
-	this->placeShip(ships[4]);*/
-	
-	//Карта 2
-	this->ships.emplace_back(0, 0, false, 5);
-	this->ships.emplace_back(0, 2, false, 1);
-	this->ships.emplace_back(7, 0, true, 2);
-	this->ships.emplace_back(5, 6, true, 3);
-	this->ships.emplace_back(9, 0, true, 4);
-
-	this->placeShip(ships[0]);
-	this->placeShip(ships[1]);
-	this->placeShip(ships[2]);
-	this->placeShip(ships[3]);
-	this->placeShip(ships[4]);
-
-
-	//this->currentShipsAmount = this->shipsAmount;
-	this->currentShipsAmount = this->ships.size();
-	/*this->placeShip(Ship::Ship(1, 3, true, 5));
-	this->placeShip(Ship::Ship(5, 3, true, 3));
-	this->placeShip(Ship::Ship(1, 1, false, 3));
-	this->placeShip(Ship::Ship(8, 8, true, 2));
-	this->placeShip(Ship::Ship(8, 6, false, 1));*/
-
-	std::cout << std::endl;
-	this->getMapValue();
-	std::cout << "enemyMap Ship quantity = " << this->getShipsAmount() << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "----------Map Construcror2 END----------" << std::endl;
-	std::cout << std::endl;
-}
-
 int Map::getSizeI() const
 {
 	return mapSizeI;
@@ -176,6 +115,7 @@ int Map::getSizeJ() const
 
 void Map::getMapValue() const
 {
+	std::cout << "-rfr-" << std::endl;
 		for (int i = 0; i < this->mapSizeI; i++)
 		{
 			for (int j = 0; j < this->mapSizeJ; j++)
@@ -279,6 +219,8 @@ void Map::renderMap(sf::RenderWindow* targetWindow) const
 {
 	for (int i = 0; i < this->getSizeI(); i++)
 	{
+		targetWindow->draw(this->text12345[i]);
+		targetWindow->draw(this->textABCDE[i]);
 		for (int j = 0; j < this->getSizeJ(); j++)
 		{
 			targetWindow->draw(this->map[i][j].shapeForPlayer);
@@ -495,6 +437,7 @@ void Map::placeShip(const Ship& ship) //for computer's ships
 		}
 	}
 	this->shipsAmount++;
+	this->currentShipsAmount = this->shipsAmount;
 }
 
 bool Map::placeShip(const OutMapShip& outMapShip, const sf::RenderWindow* window) //for player's ships
@@ -608,6 +551,8 @@ void Map::clearMap()
 			this->map[i][j].value = 0;
 		}
 	}
+	this->shipsAmount = 0;
+	this->currentShipsAmount = 0;
 }
 
 Map::PieceOfMap::PieceOfMap()

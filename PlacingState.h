@@ -16,6 +16,8 @@ private:
     sf::Text yourShipsText;
     Map playerMap = Map(30, 100);
 
+    std::vector<sf::RectangleShape> outMapShipsTable;
+
     //int deck1, deck2, deck3, deck4, deck5;
 
     std::map<std::string, Button*> buttons2;

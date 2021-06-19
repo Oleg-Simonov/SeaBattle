@@ -11,17 +11,19 @@ class State
 private:
 protected:
 	
+	
+
 	std::stack<State*>* statesPointer;
 	sf::Vector2i mousePosWindow;
 	sf::Clock clock;
 
-	bool endState;
+	int endState;
 
 public:
 	State(std::stack<State*>* states);
 	~State();
 
-	const bool getEndState() const;
+	const int getEndState() const;
 	void mouseUpdatePosition(sf::RenderWindow* targetWindow);
 	virtual void update(sf::RenderWindow* targetWindow = nullptr) = 0;
 	virtual void render(sf::RenderWindow* targetWindow = nullptr) = 0;

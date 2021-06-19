@@ -10,7 +10,6 @@
 		float windowCoorX, windowCoorY;
 		int deckAmount;
 		bool grab, direction;
-		int color;
 		sf::RectangleShape shape;
 
 		OutMapShip(float windowCoorX, float windowCoorY, int deckAmount);

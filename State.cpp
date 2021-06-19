@@ -2,7 +2,8 @@
 
 State::State(std::stack<State*>* statesPointer)
 {
-	endState = false;
+
+	this->endState = 0;
 
 	this->statesPointer = statesPointer;
 }
@@ -11,7 +12,7 @@ State::~State()
 {
 }
 
-const bool State::getEndState() const
+const int State::getEndState() const
 {
 	return this->endState;
 }
@@ -19,5 +20,5 @@ const bool State::getEndState() const
 void State::mouseUpdatePosition(sf::RenderWindow* targetWindow)
 {
 	this->mousePosWindow = sf::Mouse::getPosition(*targetWindow);
-	std::cout << mousePosWindow.x << " " << mousePosWindow.y << std::endl;
+	//std::cout << mousePosWindow.x << " " << mousePosWindow.y << std::endl;
 }

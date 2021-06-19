@@ -9,10 +9,13 @@ OutMapShip::OutMapShip(float windowCoorX, float windowCoorY, int deckAmount)
     this->direction = false;
 
     this->shape.setPosition(this->windowCoorX, this->windowCoorY);
-    this->shape.setSize(sf::Vector2f(27.f, 27.f * this->deckAmount));
+    this->shape.setSize(sf::Vector2f(27.f, 27.f * this->deckAmount + this->deckAmount));
     this->shape.setFillColor(sf::Color::White);
     this->shape.setOutlineThickness(1.f);
     this->shape.setOutlineColor(sf::Color::Black);
+
+
+
 }
 
 OutMapShip::~OutMapShip()
@@ -84,16 +87,20 @@ void OutMapShip::update(sf::RenderWindow* window, int prohibitedZoneValue)
 
             this->shape.setPosition((float)sf::Mouse::getPosition(*window).x - 15, (float)sf::Mouse::getPosition(*window).y - 15);
 
-            if (direction)
-                this->shape.setSize(sf::Vector2f(27.f * this->deckAmount, 27.f));
-            else
-                this->shape.setSize(sf::Vector2f(27.f, 27.f * this->deckAmount));
+            if (direction)   this->shape.setSize(sf::Vector2f(27.f * this->deckAmount + this->deckAmount, 27.f));
+
+            else   this->shape.setSize(sf::Vector2f(27.f, 27.f * this->deckAmount + this->deckAmount));
     }
     else
     {
+        //this->shape.setPosition(this->windowCoorX, this->windowCoorY);
+        //this->shape.setFillColor(sf::Color::White);
 
         this->shape.setPosition(this->windowCoorX, this->windowCoorY);
+        this->shape.setSize(sf::Vector2f(27.f, 27.f * this->deckAmount + this->deckAmount));
         this->shape.setFillColor(sf::Color::White);
+        this->shape.setOutlineThickness(1.f);
+        this->shape.setOutlineColor(sf::Color::Black);
     }
  
     if (this->shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))

@@ -46,10 +46,29 @@ void Game::update()
 		this->states.top()->update(this->window);
 		
 		
-		if (this->states.top()->getEndState())
+		if (this->states.top()->getEndState() == 1)
 		{
 			delete this->states.top();
 			this->states.pop();
+		}
+
+		else if (this->states.top()->getEndState() == 2)
+		{
+			while (!this->states.empty())
+			{
+				delete this->states.top();
+				this->states.pop();
+			}
+			this->states.emplace(new PlacingState(&this->states));
+		}
+
+		else if (this->states.top()->getEndState() == 3)
+		{
+			while (!this->states.empty())
+			{
+				delete this->states.top();
+				this->states.pop();
+			}
 		}
 	}
 	else this->window->close();

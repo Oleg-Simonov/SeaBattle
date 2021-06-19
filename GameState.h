@@ -1,5 +1,6 @@
 #pragma once
 #include "State.h"
+#include "Legend.h"
 #include <cstdlib> // для функций rand() и srand()
 #include <ctime> // для функции time()
 #include <algorithm>
@@ -12,14 +13,28 @@ class GameState :
 {
 private:
     sf::Font font;
-    sf::Text infoText;
-    Map enemyMap = Map(1);
+    sf::Text textAboutPlayer;
+    sf::Text textAboutEnemy;
+    sf::Text textEndGame;
+
+    Legend legend;
+
+    Map enemyMap = Map(390, 100, 1);
     Map* playerMap;
 
     bool playerMove;
     int dirCounter;
     int needComeBack;
 
+    struct ClickFlags
+    {
+        bool mouseLeft;
+        bool againButton;
+        bool quitButton;
+    };
+
+    ClickFlags clickFlags;
+    std::map<std::string, Button*> buttons;
     std::vector<OutMapShip> outMapShip;
     std::vector<int> nonRepeatVector;
     std::vector<std::vector<int>> knownFields;
@@ -32,12 +47,6 @@ private:
         CoordinatesOfStrike(int i, int j);
     };
 
-    struct ClickFlags
-    {
-        bool mouseLeft;
-    };
-
-    ClickFlags clickFlags;
     CoordinatesOfStrike coorOfStrike;
     std::vector<CoordinatesOfStrike> damagedDecks;
     

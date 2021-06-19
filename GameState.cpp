@@ -1,31 +1,51 @@
 #include "GameState.h"
 
 GameState::GameState(std::stack<State*>* statesPointer, Map* playerMap) : State(statesPointer)
-
 {
 	srand(static_cast<unsigned int>(time(0)));
 	//init var
-	this->clickFlags.mouseLeft = false;
 	this->dirCounter = 0;
 	this->needComeBack = 0;
 
-	//this->playerMap = playerMap;
-	this->playerMap = new Map(100, 100);
+	this->clickFlags.mouseLeft = false;
+	this->clickFlags.againButton = false;
+	this->clickFlags.quitButton = false;
+
+	this->playerMap = playerMap;
+	//this->playerMap = new Map(100, 100);
 	this->playerMove = true;
 
 	//init font
 	if (!this->font.loadFromFile("Fonts\\font.ttf"))	std::cout << "Font error" << std::endl; //should be refined
 
 	//init text
-	infoText.setFont(font);
-	infoText.setCharacterSize(21);
-	infoText.setPosition(sf::Vector2f(35, 370));
-	//infoText.setString("Hellovfvgfdfffffffffffffffffff");
+	textAboutPlayer.setFont(font);
+	textAboutPlayer.setCharacterSize(21);
+	textAboutPlayer.setPosition(sf::Vector2f(35, 450));
+
+	textAboutEnemy.setFont(font);
+	textAboutEnemy.setCharacterSize(21);
+	textAboutEnemy.setPosition(sf::Vector2f(395, 450));
+
+	textEndGame.setFont(font);
+	textEndGame.setCharacterSize(35);
+	textEndGame.setPosition(sf::Vector2f(335, 45));
+
+	//Buttors init
+	this->buttons["START_AGAIN"] = new Button(770, 415, 115, 35,
+		&this->font, "Start again",
+		sf::Color(70, 70, 70, 200), sf::Color(150, 150, 150, 255), sf::Color(20, 20, 20, 200));
+
+	this->buttons["QUIT"] = new Button(770, 465, 115, 35,
+		&this->font, "Quit",
+		sf::Color(70, 70, 70, 200), sf::Color(150, 150, 150, 255), sf::Color(20, 20, 20, 200));
 }
 
 GameState::~GameState()
 {
 	delete this->playerMap;
+	for (auto it : this->buttons)
+		delete it.second;
 }
 
 void GameState::coordCalc()
@@ -182,199 +202,111 @@ void GameState::ArtificInt(sf::RenderWindow* targetWindow)
 
 void GameState::update(sf::RenderWindow* targetWindow)
 {
-	if (this->playerMove == false)
+	if (enemyMap.getCurrentShipsAmount() > 0 && playerMap->getCurrentShipsAmount() > 0)
 	{
-		ArtificInt(targetWindow);
+		if (this->playerMove == false)
+		{
+			ArtificInt(targetWindow);
+		}
+
+		//mouse poll----------------------------------------------------
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !this->clickFlags.mouseLeft)
+		{
+			//std::cout << this->nonRepeatRandNumber() << std::endl;
+			if (this->playerMove)
+				this->playerMove = this->enemyMap.attack(targetWindow);
+
+			this->clickFlags.mouseLeft = true;
+		}
+
+		if (!sf::Mouse::isButtonPressed(sf::Mouse::Left) && this->clickFlags.mouseLeft)
+		{
+			this->clickFlags.mouseLeft = false;
+		}
+
+		//Text update------------------------------------------------------
+		std::stringstream ss;
+		ss << "Enemy ships remain: " << enemyMap.getCurrentShipsAmount() << " out of " << enemyMap.getShipsAmount() << "\n";
+
+		/*for (int i = 0; i < enemyMap.getShipsAmount(); i++)
+		{
+			ss << "Enemy ship " << i + 1 << " HP: " << (enemyMap.getShips() + i)->getShipHp() << " out of " << (enemyMap.getShips() + i)->getDeckAmount() << "\n";
+		}*/
+			/*<< "Enemy ship " << 0 << " HP: " << enemyMap.getShips()->getShipHp() << " out of " << enemyMap.getShips()->getDeckAmount() << "\n"
+			<< "Enemy ship " << 1 << " HP: " << (enemyMap.getShips() + 1)->getShipHp() << " out of " << (enemyMap.getShips() + 1)->getDeckAmount() << "\n"
+			<< "Enemy ship " << 2 << " HP: " << (enemyMap.getShips() + 2)->getShipHp() << " out of " << (enemyMap.getShips() + 2)->getDeckAmount() << "\n"
+			<< "Enemy ship " << 3 << " HP: " << (enemyMap.getShips() + 3)->getShipHp() << " out of " << (enemyMap.getShips() + 3)->getDeckAmount() << "\n"
+			<< "Enemy ship " << 4 << " HP: " << (enemyMap.getShips() + 4)->getShipHp() << " out of " << (enemyMap.getShips() + 4)->getDeckAmount() << "\n"
+			;*/
+		this->textAboutEnemy.setString(ss.str());
+
+		ss.str("");
+		ss << "Your ships remain: " << playerMap->getCurrentShipsAmount() << " out of " << playerMap->getShipsAmount() << "\n";
+		this->textAboutPlayer.setString(ss.str());
+
+		std::cout << sf::Mouse::getPosition(*targetWindow).x << "   " << sf::Mouse::getPosition(*targetWindow).y << std::endl;
+
+		enemyMap.updateMap(targetWindow, 1);
+		playerMap->updateMap(targetWindow);
 	}
-
-
-
-
-	/*
-	if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1))
+	else if (enemyMap.getCurrentShipsAmount() <= 0)
 	{
-		coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1);
-		botAttack(targetWindow);
+		std::stringstream ss;
+		ss << "YOU WIN!";
+		this->textEndGame.setString(ss.str());
 	}
 	else
 	{
-
-		if (checkField(damagedDecks[0].i, damagedDecks[0].j + 1))
-		{
-			coordCalc(damagedDecks[0].i, damagedDecks[0].j + 1);
-			botAttack(targetWindow);
-		}
-		else if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + 1))
-		{
-			coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + 1);
-			botAttack(targetWindow);
-		}
-		else std::cout << "How did it happen3?" << std::endl;
+		std::stringstream ss;
+		ss << "YOU LOST!";
+		this->textEndGame.setString(ss.str());
 	}
-			}
-			//vertical ship---------------------------------------------------------------------------------------------------
-			else if (damagedDecks[0].j == damagedDecks[1].j)
-			{
-			if (checkField(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j))
-			{
-				coordCalc(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j);
-				botAttack(targetWindow);
-			}
-			else
-			{
-
-				if (checkField(damagedDecks[0].i + 1, damagedDecks[0].j))
-				{
-					coordCalc(damagedDecks[0].i + 1, damagedDecks[0].j);
-					botAttack(targetWindow);
-				}
-				else if (checkField(damagedDecks[sizeDD].i + 1, damagedDecks[sizeDD].j))
-				{
-					coordCalc(damagedDecks[sizeDD].i + 1, damagedDecks[sizeDD].j);
-					botAttack(targetWindow);
-				}
-				else std::cout << "How did it happen4?" << std::endl;
-			}
-			}
-			else std::cout << "How did it happen6?" << std::endl;
-			*/
 
 
-
-
-
-/*
-	std::cout << " 222 " << std::endl;
-	coordCalc();
-	int sizeDD = this->damagedDecks.size() - 1;
-	//	case 1: //the ship has been damaged, we aproximatly know coordinates where could be a deck, we should strike next to it. In general case, we have four direction for continue attack 
-	//horizontal ship------------------------------------------------------------------------------------
-	if (damagedDecks[0].i == damagedDecks[1].i)
+	if (buttons["START_AGAIN"]->isPressed() && !this->clickFlags.againButton)
 	{
-		if (damagedDecks[sizeDD].j - 1 >= 0 || this->needComeBack == 1)
-		{
 
-			if (this->needComeBack == 0)
-			{
-				if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1) == 1)
-				{
-					coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j - 1);
-					this->needComeBack = botAttack(targetWindow);
-				}
-				else
-					this->needComeBack = 1;
-				//std::cout << "How did it happen2?" << std::endl;
-			}
-			else if (this->needComeBack == 1)
-			{
-				int i = 1;
-				while (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + i) != 1)
-				{
-					i++;
-				}
-				if (checkField(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + i) == 1)
-				{
-					coordCalc(damagedDecks[sizeDD].i, damagedDecks[sizeDD].j + i);
-					botAttack(targetWindow);
-				}
-				else std::cout << "How did it happen4?" << std::endl;
-			}
-			else std::cout << "How did it happen5?" << std::endl;
-
-		}
-		else this->needComeBack = 1;
+		
+		this->endState = 2;
+		std::cout << "STartgain = " << endState << std::endl;
+		this->clickFlags.againButton = true;
 	}
-	//vertical ship---------------------------------------------------------------------------------------------------
-	else if (damagedDecks[0].j == damagedDecks[1].j)
+
+	if (!buttons["START_AGAIN"]->isPressed() && this->clickFlags.againButton)
 	{
-		if (damagedDecks[sizeDD].i - 1 >= 0 || this->needComeBack == 1)
-		{
-
-			if (this->needComeBack == 0)
-			{
-				if (checkField(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j) == 1)
-				{
-					coordCalc(damagedDecks[sizeDD].i - 1, damagedDecks[sizeDD].j);
-					this->needComeBack = botAttack(targetWindow);
-				}
-				else
-					this->needComeBack = 1;
-				//std::cout << "How did it happen2?" << std::endl;
-			}
-			else if (this->needComeBack == 1)
-			{
-				int i = 1;
-				while (checkField(damagedDecks[sizeDD].i + i, damagedDecks[sizeDD].j) != 1)
-				{
-					i++;
-				}
-				if (checkField(damagedDecks[sizeDD].i + i, damagedDecks[sizeDD].j) == 1)
-				{
-					coordCalc(damagedDecks[sizeDD].i + i, damagedDecks[sizeDD].j);
-					botAttack(targetWindow);
-				}
-				else std::cout << "How did it happen4?" << std::endl;
-			}
-			else std::cout << "How did it happen5?" << std::endl;
-
-		}
-		else this->needComeBack = 1;
+		this->clickFlags.againButton = false;
 	}
-	else std::cout << "How did it happen6?" << std::endl;
-		}
 
-		*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//mouse poll----------------------------------------------------
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !this->clickFlags.mouseLeft)
+	if (buttons["QUIT"]->isPressed() && !this->clickFlags.againButton)
 	{
-		//std::cout << this->nonRepeatRandNumber() << std::endl;
-		if(this->playerMove)
-			this->playerMove = this->enemyMap.attack(targetWindow);
-
-		this->clickFlags.mouseLeft = true;
+		this->endState = 3;
+		this->clickFlags.againButton = true;
 	}
 
-	if (!sf::Mouse::isButtonPressed(sf::Mouse::Left) && this->clickFlags.mouseLeft)
+	if (!buttons["QUIT"]->isPressed() && this->clickFlags.againButton)
 	{
-		this->clickFlags.mouseLeft = false;
+		this->clickFlags.againButton = false;
 	}
 
-	//Text update------------------------------------------------------
-	std::stringstream ss;
-	ss << "Enemy ships remain: " << enemyMap.getCurrentShipsAmount() << " out of " << enemyMap.getShipsAmount() << "\n"
-		<< "Enemy ship " << 0 << " HP: " << enemyMap.getShips()->getShipHp() << " out of " << enemyMap.getShips()->getDeckAmount() << "\n"
-		<< "Enemy ship " << 1 << " HP: " << (enemyMap.getShips() + 1)->getShipHp() << " out of " << (enemyMap.getShips() + 1)->getDeckAmount() << "\n"
-		<< "Enemy ship " << 2 << " HP: " << (enemyMap.getShips() + 2)->getShipHp() << " out of " << (enemyMap.getShips() + 2)->getDeckAmount() << "\n"
-		<< "Enemy ship " << 3 << " HP: " << (enemyMap.getShips() + 3)->getShipHp() << " out of " << (enemyMap.getShips() + 3)->getDeckAmount() << "\n"
-		<< "Enemy ship " << 4 << " HP: " << (enemyMap.getShips() + 4)->getShipHp() << " out of " << (enemyMap.getShips() + 4)->getDeckAmount() << "\n"
-		;
-	this->infoText.setString(ss.str());
+	this->mouseUpdatePosition(targetWindow);
 
-	//std::cout << sf::Mouse::getPosition(*window).x << "   " << sf::Mouse::getPosition(*window).y << std::endl;
-
-	enemyMap.updateMap(targetWindow, 1);
-	playerMap->updateMap(targetWindow);
+	for (auto it : this->buttons)
+		it.second->update(sf::Vector2f((float)this->mousePosWindow.x, (float)this->mousePosWindow.y));
 }
 
 void GameState::render(sf::RenderWindow* targetWindow)
 {
-	targetWindow->draw(infoText);
+	targetWindow->draw(textAboutPlayer);
+	targetWindow->draw(textAboutEnemy);
+	targetWindow->draw(textEndGame);
+
 	playerMap->renderMap(targetWindow);
 	enemyMap.renderMap(targetWindow);
 
+	for (auto it : this->buttons)
+		it.second->render(targetWindow);
+
+	this->legend.render(targetWindow);
 }
 
 GameState::CoordinatesOfStrike::CoordinatesOfStrike()
