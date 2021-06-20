@@ -116,7 +116,7 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !this->clickFlags.mouseLeft) // передний фронт
 	{
 
-		for (int i = 0; i < this->outMapShip.size(); i++)
+		for (size_t i = 0; i < this->outMapShip.size(); i++)
 		{
 			//if cursor hover over the ship, we will grab it
 			if (this->outMapShip[i].shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*targetWindow).x, (float)sf::Mouse::getPosition(*targetWindow).y) && this->outMapShip[i].getGrab() == false)
@@ -148,7 +148,7 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 	//space poll----------------------------------------------------
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && !this->clickFlags.space)
 	{
-		for (int i = 0; i < this->outMapShip.size(); i++)
+		for (size_t i = 0; i < this->outMapShip.size(); i++)
 			if (this->outMapShip[i].getGrab()) this->outMapShip[i].setDirection();
 
 		this->clickFlags.space = true;
@@ -251,7 +251,7 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 
 	
 
-	for (int shipCounter = 0; shipCounter < this->outMapShip.size(); shipCounter++)
+	for (size_t shipCounter = 0; shipCounter < this->outMapShip.size(); shipCounter++)
 	{
 		int number = this->playerMap.determinationChosenMapField(targetWindow);
 
@@ -290,10 +290,10 @@ void PlacingState::render(sf::RenderWindow* targetWindow)
 
 	playerMap.renderMap(targetWindow);
 
-	for (int i = 0; i < this->outMapShipsTable.size(); i++)
+	for (size_t i = 0; i < this->outMapShipsTable.size(); i++)
 		targetWindow->draw(this->outMapShipsTable[i]);
 
-	for (int i = 0; i < this->outMapShip.size(); i++)
+	for (size_t i = 0; i < this->outMapShip.size(); i++)
 		outMapShip[i].render(targetWindow);
 
 	for (auto it : this->buttons2)

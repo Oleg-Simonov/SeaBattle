@@ -4,7 +4,7 @@ Game::Game()
 {
 	//init window
 	this->videoMode.width = 1100;
-	this->videoMode.height = 900;
+	this->videoMode.height = 700;
 	this->window = new sf::RenderWindow(videoMode, "SeaBattle");
 	this->window->setFramerateLimit(60);
 

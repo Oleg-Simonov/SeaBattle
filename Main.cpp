@@ -9,9 +9,6 @@
 #include "Map.h"
 #include "Game.h"
 
-
-int Ship::shipCounter = 0;
-
 int main()
 {
 	srand(time(NULL));

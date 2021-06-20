@@ -85,7 +85,7 @@ void GameState::botAttack(sf::RenderWindow* targetWindow, int coorI, int coorJ)
 {
 	coordCalc(coorI, coorJ);
 	std::cout << "coorOfStrike i = " << coorOfStrike.i << " coorOfStrike j = " << coorOfStrike.j << std::endl;
-	switch (this->playerMap->attack(targetWindow, coorI, coorJ))
+	switch (this->playerMap->attack(coorI, coorJ))
 	{
 	case 0:
 		std::cout << " Miss! " << std::endl;
@@ -214,7 +214,14 @@ void GameState::update(sf::RenderWindow* targetWindow)
 		{
 			//std::cout << this->nonRepeatRandNumber() << std::endl;
 			if (this->playerMove)
-				this->playerMove = this->enemyMap.attack(targetWindow);
+			{
+				int number = this->enemyMap.determinationChosenMapField(targetWindow);
+				int coorJ = number % 10;
+				int coorI = (number - coorJ) / 10;
+				this->playerMove = this->enemyMap.attack(coorI, coorJ);
+				this->enemyMap.getMapValue();
+			}
+
 
 			this->clickFlags.mouseLeft = true;
 		}
@@ -244,7 +251,7 @@ void GameState::update(sf::RenderWindow* targetWindow)
 		ss << "Your ships remain: " << playerMap->getCurrentShipsAmount() << " out of " << playerMap->getShipsAmount() << "\n";
 		this->textAboutPlayer.setString(ss.str());
 
-		std::cout << sf::Mouse::getPosition(*targetWindow).x << "   " << sf::Mouse::getPosition(*targetWindow).y << std::endl;
+		//std::cout << sf::Mouse::getPosition(*targetWindow).x << "   " << sf::Mouse::getPosition(*targetWindow).y << std::endl;
 
 		enemyMap.updateMap(targetWindow, 1);
 		playerMap->updateMap(targetWindow);
@@ -265,10 +272,8 @@ void GameState::update(sf::RenderWindow* targetWindow)
 
 	if (buttons["START_AGAIN"]->isPressed() && !this->clickFlags.againButton)
 	{
-
-		
 		this->endState = 2;
-		std::cout << "STartgain = " << endState << std::endl;
+		//std::cout << "STartgain = " << endState << std::endl;
 		this->clickFlags.againButton = true;
 	}
 

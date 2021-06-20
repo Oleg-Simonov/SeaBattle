@@ -17,7 +17,6 @@ private:
 	public:
 		int value;
 		sf::RectangleShape shapeForPlayer;
-		sf::RectangleShape shapeForDebug;
 
 		PieceOfMap();
 		~PieceOfMap();
@@ -69,7 +68,7 @@ public:
 	void randomPlace();
 	void placeShip(const Ship& ship);
 	bool placeShip(const OutMapShip& ship, const sf::RenderWindow* window);
-	int attack(const sf::RenderWindow* window, int attackI = 1000, int attackJ = 1000); //if attackI and attackJ are exist then computer attacks player's map
+	int attack(int attackI = 1000, int attackJ = 1000); //if attackI and attackJ are exist then computer attacks player's map
 	void clearMap();
 
 	void updateMap(const sf::RenderWindow* window);
