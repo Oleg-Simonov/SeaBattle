@@ -108,7 +108,7 @@ bool GameState::checkField(int coorI, int coorJ) //this function check whether m
 {
 	if (!(coorI < 0 || coorI >= this->playerMap->getSizeI() || coorJ < 0 || coorJ >= this->playerMap->getSizeJ()))
 	{
-		for (int i = 0; i < this->nonRepeatVector.size(); i++)
+		for (size_t i = 0; i < this->nonRepeatVector.size(); i++)
 		{
 			//std::cout << this->nonRepeatVector[i] << std::endl;
 			if (this->nonRepeatVector[i] == coorI * 10 + coorJ)

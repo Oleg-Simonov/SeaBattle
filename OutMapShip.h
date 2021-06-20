@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include <SFML/Graphics.hpp>
 #include <iostream>
 //#include "Map.h"
@@ -21,9 +20,6 @@
 		bool getGrab() const;
 		bool getDirection() const;
 
-		void setWindowCoorX(float windowCoorX);
-		void setWindowCoorY(float windowCoorY);
-		void setDeckAmount(int deckAmount);
 		void setGrab(bool grab);
 		void setDirection();
 

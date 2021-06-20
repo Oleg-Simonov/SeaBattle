@@ -1,6 +1,19 @@
 #include "Map.h"
 
-//Map for player
+Map::PieceOfMap::PieceOfMap()
+{
+	this->value = 0;
+	this->shape.setSize(sf::Vector2f(27.f, 27.f));
+	this->shape.setFillColor(sf::Color::Blue);
+	this->shape.setOutlineThickness(1.f);
+	this->shape.setOutlineColor(sf::Color::Black);
+	this->shape.getPosition();
+}
+
+Map::PieceOfMap::~PieceOfMap()
+{
+}
+
 Map::Map(float coorWindX, float coorWindY, bool enemy) : prohibitedZone(10, std::vector<int>(10, 0))
 {
 	std::cout << std::endl;
@@ -9,10 +22,7 @@ Map::Map(float coorWindX, float coorWindY, bool enemy) : prohibitedZone(10, std:
 	//init font
 	if (!this->font.loadFromFile("Fonts\\font.ttf"))	std::cout << "FontMap error" << std::endl; //should be refined
 	
-	int coorI = 0;
-	int coorJ = 0;
-	bool dir = 1;
-
+	//init var
 	this->shipsAmount = 0;
 	this->mapSizeI = 10;
 	this->mapSizeJ = 10;
@@ -21,6 +31,7 @@ Map::Map(float coorWindX, float coorWindY, bool enemy) : prohibitedZone(10, std:
 	int scale = 29;
 	int textSize = 17;
 
+	
 	this->text12345.resize(mapSizeI);
 	this->textABCDE.resize(mapSizeJ);
 	this->map.resize(mapSizeI);
@@ -29,23 +40,18 @@ Map::Map(float coorWindX, float coorWindY, bool enemy) : prohibitedZone(10, std:
 		this->map[i].resize(mapSizeJ);
 		for (int j = 0; j < this->mapSizeJ; j++)
 		{
-			this->map[i][j].value = 0;
-			this->map[i][j].shapeForPlayer.setSize(sf::Vector2f(27.f, 27.f));
-			this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Blue);
-			this->map[i][j].shapeForPlayer.setOutlineThickness(1.f);
-			this->map[i][j].shapeForPlayer.setOutlineColor(sf::Color::Black);
-			this->map[i][j].shapeForPlayer.setPosition(sf::Vector2f(coorWindX + textSize + j * scale, coorWindY + (textSize + 5) + i * scale));
-			this->map[i][j].shapeForPlayer.getPosition();
+			this->map[i][j].shape.setPosition(sf::Vector2f(coorWindX + textSize + j * scale, coorWindY + (textSize + 5) + i * scale));
 		}
 
+		//init texts
 		text12345[i].setFont(font);
 		text12345[i].setCharacterSize(textSize);
-		text12345[i].setPosition(sf::Vector2f(coorWindX, this->map[i][0].shapeForPlayer.getPosition().y + 3));
+		text12345[i].setPosition(sf::Vector2f(coorWindX, this->map[i][0].shape.getPosition().y + 3));
 		text12345[i].setString(std::to_string(i));
 
 		textABCDE[i].setFont(font);
 		textABCDE[i].setCharacterSize(textSize);
-		textABCDE[i].setPosition(sf::Vector2f(this->map[0][i].shapeForPlayer.getPosition().x + 7, coorWindY));
+		textABCDE[i].setPosition(sf::Vector2f(this->map[0][i].shape.getPosition().x + 7, coorWindY));
 		char ch = 65 + i;
 		textABCDE[i].setString(ch);
 	}
@@ -145,41 +151,23 @@ std::vector<Ship>::const_iterator Map::getShips() const
 	return this->ships.begin();
 }
 
-void Map::updateMap(const sf::RenderWindow* window)
+void Map::updateMap(const sf::RenderWindow* window, bool enemyMap)
 {
 	
 	for (int i = 0; i < this->getSizeI(); i++)
 	{
 		for (int j = 0; j < this->getSizeJ(); j++)
 		{
-			if (this->map[i][j].shapeForPlayer.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
-				this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Cyan);
+			if (this->map[i][j].shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
+				this->map[i][j].shape.setFillColor(sf::Color::Cyan);
 
-			else if (this->map[i][j].value == 2) this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Red);
+			else if (this->map[i][j].value == 2) this->map[i][j].shape.setFillColor(sf::Color::Red);
 
-			else if (this->map[i][j].value == 1) this->map[i][j].shapeForPlayer.setFillColor(sf::Color::White);
+			else if (this->map[i][j].value == 1 && enemyMap == 0) this->map[i][j].shape.setFillColor(sf::Color::White);
 
-			else if (this->map[i][j].value == 3) this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Green);
+			else if (this->map[i][j].value == 3) this->map[i][j].shape.setFillColor(sf::Color::Green);
 
-			else this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Blue);
-		}
-	}
-}
-
-void Map::updateMap(const sf::RenderWindow* window, bool enemy)
-{
-	for (int i = 0; i < this->getSizeI(); i++)
-	{
-		for (int j = 0; j < this->getSizeJ(); j++)
-		{
-			if (this->map[i][j].shapeForPlayer.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
-				this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Cyan);
-
-			else if (this->map[i][j].value == 2) this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Red);
-
-			else if (this->map[i][j].value == 3) this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Green);
-
-			else this->map[i][j].shapeForPlayer.setFillColor(sf::Color::Blue);
+			else this->map[i][j].shape.setFillColor(sf::Color::Blue);
 		}
 	}
 }
@@ -192,7 +180,7 @@ void Map::renderMap(sf::RenderWindow* targetWindow) const
 		targetWindow->draw(this->textABCDE[i]);
 		for (int j = 0; j < this->getSizeJ(); j++)
 		{
-			targetWindow->draw(this->map[i][j].shapeForPlayer);
+			targetWindow->draw(this->map[i][j].shape);
 		}
 	}
 }
@@ -340,8 +328,8 @@ bool Map::calcCoordinanes(bool dir, int deckAmount)
 	if (this->nonRepeatVector.size())
 	{
 		int randomNunber = rand() % this->nonRepeatVector.size();
-		coorJ = nonRepeatVector[randomNunber] % 10;
-		coorI = (nonRepeatVector[randomNunber] - coorJ) / 10;
+		int coorJ = nonRepeatVector[randomNunber] % 10;
+		int coorI = (nonRepeatVector[randomNunber] - coorJ) / 10;
 
 		std::cout << " nonRepeatVector = " << nonRepeatVector[randomNunber] << " coorI = " << coorI << " j = " << coorJ << std::endl;
 
@@ -432,69 +420,67 @@ int Map::attack(int attackI, int attackJ)
 	//return 0 - if miss;
 	//return 1 - if the ship has been damaged;
 	//return 2 - if the ship has been destroyed;
+	//return -1 - incorrect parametrs;
+	if ((attackI > this->getSizeI()) || attackJ > this->getSizeJ()) return -1;//out of range check
 
-	if ((attackI < this->getSizeI()) && attackJ < this->getSizeJ()) //out of range check
+	switch (this->map[attackI][attackJ].value)
 	{
-		for (size_t shipCounter = 0; shipCounter < this->ships.size(); shipCounter++)
-		{
-			if (this->ships[shipCounter].isItDamage(attackI, attackJ)) //has the ship been damaged?
+		case 1: //gotcha
+			for (size_t shipCounter = 0; shipCounter < this->ships.size(); shipCounter++)
 			{
-				this->map[attackI][attackJ].value = 2; //mark destroyed deck
-
-				if (this->ships[shipCounter].getShipHp() == 0) //has the ship been destoyed?
+				if (this->ships[shipCounter].isItDamage(attackI, attackJ)) //which ship has been damaged?
 				{
-					this->currentShipsAmount--;
+					this->map[attackI][attackJ].value = 2;
 
-					//fixation area where another ship can't be
-					int coorShipHeadI = this->ships[shipCounter].getI();
-					int coorShipHeadJ = this->ships[shipCounter].getJ();
+					if (this->ships[shipCounter].getShipHp() == 0) //has the ship been destoyed?
+					{
+						this->currentShipsAmount--;
 
-					if (this->ships[shipCounter].getDirection()) //horizontal
-					{
-						for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
+						//fixation area where another ship can't be
+						int coorShipHeadI = this->ships[shipCounter].getI();
+						int coorShipHeadJ = this->ships[shipCounter].getJ();
+
+						if (this->ships[shipCounter].getDirection()) //horizontal
 						{
-							for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); j++)
+							for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
 							{
-								if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
+								for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); j++)
 								{
-									if(this->map[i][j].value == 0) this->map[i][j].value = 3;
-								}
-									
-							}
-						}
-					}
-					else //vertical
-					{
-						for (int i = coorShipHeadI - 1; i <= coorShipHeadI + this->ships[shipCounter].getDeckAmount(); i++)
-						{
-							for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + 1; j++)
-							{
-								if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
-								{
-									if (this->map[i][j].value == 0) this->map[i][j].value = 3;
+									if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
+									{
+										if (this->map[i][j].value == 0) this->map[i][j].value = 3;
+									}
+
 								}
 							}
 						}
+						else //vertical
+						{
+							for (int i = coorShipHeadI - 1; i <= coorShipHeadI + this->ships[shipCounter].getDeckAmount(); i++)
+							{
+								for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + 1; j++)
+								{
+									if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
+									{
+										if (this->map[i][j].value == 0) this->map[i][j].value = 3;
+									}
+								}
+							}
+						}
+						return 2;
 					}
+				}
+			}
+			return 1;
 
-					std::cout << "you have destroyed " << shipCounter << " ship" << std::endl;
-					return 2;
-				}
-				else
-				{
-					std::cout << "you have damaged " << shipCounter << " ship" << std::endl;
-					return 1;
-				}
-			}
-			else if (map[attackI][attackJ].value == 0)
-			{
-				this->map[attackI][attackJ].value = 3;
-				std::cout << "you haven't damaged " << shipCounter << std::endl;
-				return 0;
-			}
-		}
+		case 0: //miss
+			this->map[attackI][attackJ].value = 3;
+			std::cout << "you miss " << std::endl;
+			return 0;
+		case 2: //attack the same field second time
+		case 3: //attack the same field second time
+			return 1;
 	}
-	else return 0;
 }
 
 void Map::clearMap()
@@ -512,15 +498,6 @@ void Map::clearMap()
 	this->currentShipsAmount = 0;
 }
 
-Map::PieceOfMap::PieceOfMap()
-{
-}
-
-Map::PieceOfMap::~PieceOfMap()
-{
-}
-
-
 int Map::determinationChosenMapField(const sf::RenderWindow* const window)
 {
 	//determination Chosen Map Field in depending on cursor location
@@ -531,7 +508,7 @@ int Map::determinationChosenMapField(const sf::RenderWindow* const window)
 	{
 		for (int j = 0; j < this->getSizeJ(); j++)
 		{
-			if (this->map[i][j].shapeForPlayer.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
+			if (this->map[i][j].shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
 			{
 				shipHeadI = i;
 				shipHeadJ = j;

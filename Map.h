@@ -16,21 +16,17 @@ private:
 	{
 	public:
 		int value;
-		sf::RectangleShape shapeForPlayer;
+		sf::RectangleShape shape;
 
 		PieceOfMap();
 		~PieceOfMap();
 	};
 
 
-	int coorI, coorJ;
-
 	int mapSizeI, mapSizeJ;
 	int currentShipsAmount, shipsAmount;
 
 	sf::Font font;
-	//sf::Text text12345[10];
-	//sf::Text textABCDE[10];
 
 	std::vector<sf::Text> text12345;
 	std::vector<sf::Text> textABCDE;
@@ -55,7 +51,6 @@ public:
 	int getSizeJ() const;
 	void getMapValue() const;
 	int getMapValue(int i, int j) const;
-	//sf::RectangleShape getMapValue(int i, int j) const;
 	int getShipsAmount() const;
 	int getCurrentShipsAmount() const;
 	int getProhibitedZoneIJ(int i, int j) const;
@@ -71,8 +66,7 @@ public:
 	int attack(int attackI = 1000, int attackJ = 1000); //if attackI and attackJ are exist then computer attacks player's map
 	void clearMap();
 
-	void updateMap(const sf::RenderWindow* window);
-	void updateMap(const sf::RenderWindow* window, bool enemy);
+	void updateMap(const sf::RenderWindow* window, bool enemyMap = 0);
 	void renderMap(sf::RenderWindow* targetWindow) const;
 
 	int determinationChosenMapField(const sf::RenderWindow* const window);

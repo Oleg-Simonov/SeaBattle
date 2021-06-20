@@ -4,7 +4,6 @@
 #include <cstdlib> // для функций rand() и srand()
 #include <ctime> // для функции time()
 #include <algorithm>
-#include <list>
 
 class CoordinatesOfStrike;
 
