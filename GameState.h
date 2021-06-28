@@ -4,6 +4,7 @@
 #include <cstdlib> // для функций rand() и srand()
 #include <ctime> // для функции time()
 #include <algorithm>
+#include <SFML/Audio.hpp>
 
 class CoordinatesOfStrike;
 
@@ -11,16 +12,31 @@ class GameState :
     public State
 {
 private:
+    sf::SoundBuffer soundBufferMiss;
+    sf::SoundBuffer soundBufferCrash;
+    sf::SoundBuffer soundBufferStartGame;
+    sf::SoundBuffer soundBufferWin;
+    sf::SoundBuffer soundBufferLose;
+
+    sf::Sound soundMiss;
+    sf::Sound soundCrash;
+    sf::Sound soundStartGame;
+    sf::Sound soundWin;
+    sf::Sound soundLose;
+
     sf::Font font;
     sf::Text textAboutPlayer;
     sf::Text textAboutEnemy;
-    sf::Text textEndGame;
+    sf::Text textInfo;
+    sf::Text textYourMap;
+    sf::Text textEnemyMap;
 
-    Legend legend;
+    Legend legend = Legend(100, 500);
 
-    Map enemyMap = Map(390, 100, 1);
+    Map enemyMap = Map(770, 100, 1);
     Map* playerMap;
 
+    bool winFlag;
     bool playerMove;
     int dirCounter;
     int needComeBack;

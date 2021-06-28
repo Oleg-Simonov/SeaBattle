@@ -10,8 +10,9 @@ class State
 {
 private:
 protected:
-	
-	
+
+	sf::Texture backgroundTexture;
+	sf::Sprite backgroundSprite;
 
 	std::stack<State*>* statesPointer;
 	sf::Vector2i mousePosWindow;

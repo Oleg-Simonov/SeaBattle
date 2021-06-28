@@ -9,12 +9,20 @@ class PlacingState :
     public State
 {
 private:
+    sf::SoundBuffer soundBufferPlacing;
+    sf::Sound soundPlacing;
+    sf::SoundBuffer soundBufferFlipShip;
+    sf::Sound soundFlipShip;
+
     sf::Font font;
     sf::Text headerText;
     sf::Text helpText;
     sf::Text yourMapText;
     sf::Text yourShipsText;
-    Map playerMap = Map(30, 100);
+
+    sf::RectangleShape helpTextBackground;
+
+    Map playerMap = Map(110, 100);
 
     std::vector<sf::RectangleShape> outMapShipsTable;
 

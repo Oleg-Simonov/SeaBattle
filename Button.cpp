@@ -5,6 +5,7 @@ Button::Button(float x, float y, float width, float height,
 	sf::Color idleColor, sf::Color hoverColor, sf::Color activeColor, bool visible)
 {
 	this->buttonState = BTN_IDLE;
+	this->flagHover = false;
 
 	this->idleColor = idleColor;
 	this->hoverColor = hoverColor;
@@ -25,6 +26,10 @@ Button::Button(float x, float y, float width, float height,
 		this->shape.getPosition().y + (this->shape.getGlobalBounds().height / 2.f) - this->text.getGlobalBounds().height / 2.f
 	);
 
+	//sound init
+	if (!soundBufferHover.loadFromFile("Resources\\Sounds\\ButtonHover.wav")) std::cout << "sound error" << std::endl; //should be refined
+	this->soundHover.setBuffer(soundBufferHover);
+	this->soundHover.setVolume(35.f);
 }
 
 Button::~Button()
@@ -62,9 +67,16 @@ void Button::update(const sf::Vector2f mousePos)
 		{
 		case BTN_IDLE:
 			this->shape.setFillColor(this->idleColor);
+			flagHover = 0;
 			break;
 
 		case BTN_HOVER:
+			if (flagHover == 0)
+			{
+				this->soundHover.play();
+				flagHover = 1;
+			}
+
 			this->shape.setFillColor(this->hoverColor);
 			break;
 

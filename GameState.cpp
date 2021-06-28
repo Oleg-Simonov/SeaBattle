@@ -6,6 +6,7 @@ GameState::GameState(std::stack<State*>* statesPointer, Map* playerMap) : State(
 	//init var
 	this->dirCounter = 0;
 	this->needComeBack = 0;
+	this->winFlag = 0;
 
 	this->clickFlags.mouseLeft = false;
 	this->clickFlags.againButton = false;
@@ -21,24 +22,49 @@ GameState::GameState(std::stack<State*>* statesPointer, Map* playerMap) : State(
 	//init text
 	textAboutPlayer.setFont(font);
 	textAboutPlayer.setCharacterSize(21);
-	textAboutPlayer.setPosition(sf::Vector2f(35, 450));
+	textAboutPlayer.setPosition(sf::Vector2f(130, 425));
 
 	textAboutEnemy.setFont(font);
 	textAboutEnemy.setCharacterSize(21);
-	textAboutEnemy.setPosition(sf::Vector2f(395, 450));
+	textAboutEnemy.setPosition(sf::Vector2f(800, 425));
 
-	textEndGame.setFont(font);
-	textEndGame.setCharacterSize(35);
-	textEndGame.setPosition(sf::Vector2f(335, 45));
+	textInfo.setFont(font);
+	textInfo.setCharacterSize(35);
+	textInfo.setPosition(sf::Vector2f(535, 45));
+
+	textYourMap.setFont(font);
+	textYourMap.setCharacterSize(21);
+	textYourMap.setPosition(sf::Vector2f(115, 65));
+	textYourMap.setString("Your map:");
+
+	textEnemyMap.setFont(font);
+	textEnemyMap.setCharacterSize(21);
+	textEnemyMap.setPosition(sf::Vector2f(775, 65));
+	textEnemyMap.setString("Enemy's map:");
 
 	//Buttors init
-	this->buttons["START_AGAIN"] = new Button(770, 415, 115, 35,
+	this->buttons["START_AGAIN"] = new Button(650, 525, 170, 50,
 		&this->font, "Start again",
-		sf::Color(70, 70, 70, 200), sf::Color(150, 150, 150, 255), sf::Color(20, 20, 20, 200));
+		sf::Color(0, 101, 151, 200), sf::Color(0, 102, 255, 200), sf::Color(0, 0, 255, 200));
 
-	this->buttons["QUIT"] = new Button(770, 465, 115, 35,
+	this->buttons["QUIT"] = new Button(900, 525, 170, 50,
 		&this->font, "Quit",
-		sf::Color(70, 70, 70, 200), sf::Color(150, 150, 150, 255), sf::Color(20, 20, 20, 200));
+		sf::Color(0, 101, 151, 200), sf::Color(0, 102, 255, 200), sf::Color(0, 0, 255, 200));
+
+	//init sounds
+	if (!soundBufferMiss.loadFromFile("Resources\\Sounds\\mis.wav")) std::cout << "sound error" << std::endl; //should be refined
+	this->soundMiss.setBuffer(soundBufferMiss);
+	this->soundMiss.setVolume(30.f);
+
+	if (!soundBufferCrash.loadFromFile("Resources\\Sounds\\crash.wav")) std::cout << "sound error" << std::endl; //should be refined
+	this->soundCrash.setBuffer(soundBufferCrash);
+	this->soundCrash.setVolume(5.f);
+
+	if (!soundBufferStartGame.loadFromFile("Resources\\Sounds\\StartGame.wav")) std::cout << "sound error" << std::endl; //should be refined
+	this->soundStartGame.setBuffer(soundBufferStartGame);
+	this->soundStartGame.setVolume(10.f);
+
+	this->soundStartGame.play();
 }
 
 GameState::~GameState()
@@ -206,20 +232,36 @@ void GameState::update(sf::RenderWindow* targetWindow)
 	{
 		if (this->playerMove == false)
 		{
-			ArtificInt(targetWindow);
+			this->textInfo.setString("Enemy's move");
+			if (clock.getElapsedTime().asSeconds() > 0.1)
+			{
+				ArtificInt(targetWindow);
+				this->clock.restart();
+			}
 		}
+		else this->textInfo.setString("You move");
 
+		
 		//mouse poll----------------------------------------------------
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !this->clickFlags.mouseLeft)
 		{
+			this->clock.restart();
 			//std::cout << this->nonRepeatRandNumber() << std::endl;
 			if (this->playerMove)
 			{
 				int number = this->enemyMap.determinationChosenMapField(targetWindow);
+				
 				int coorJ = number % 10;
 				int coorI = (number - coorJ) / 10;
-				this->playerMove = this->enemyMap.attack(coorI, coorJ);
+
+				int result = this->enemyMap.attack(coorI, coorJ);
+				this->playerMove = result;
+
+				if (result == 1 || result == 2) this->soundCrash.play();
+				else if (result == 0) this->soundMiss.play(); 
+
 				this->enemyMap.getMapValue();
+				
 			}
 
 
@@ -256,17 +298,23 @@ void GameState::update(sf::RenderWindow* targetWindow)
 		enemyMap.updateMap(targetWindow, 1);
 		playerMap->updateMap(targetWindow);
 	}
-	else if (enemyMap.getCurrentShipsAmount() <= 0)
+	else if (enemyMap.getCurrentShipsAmount() <= 0 && this->winFlag == 0)
 	{
-		std::stringstream ss;
-		ss << "YOU WIN!";
-		this->textEndGame.setString(ss.str());
+		this->textInfo.setString("YOU WIN!");
+		if (!soundBufferWin.loadFromFile("Resources\\Sounds\\win.wav")) std::cout << "sound error" << std::endl; //should be refined
+		this->soundWin.setBuffer(soundBufferWin);
+		this->soundWin.setVolume(15.f);
+		this->soundWin.play();
+		this->winFlag = 1;
 	}
-	else
+	else if(this->winFlag == 0)
 	{
-		std::stringstream ss;
-		ss << "YOU LOST!";
-		this->textEndGame.setString(ss.str());
+		this->textInfo.setString("YOU LOSE!");
+		if (!soundBufferLose.loadFromFile("Resources\\Sounds\\Lose.wav")) std::cout << "sound error" << std::endl; //should be refined
+		this->soundLose.setBuffer(soundBufferLose);
+		this->soundLose.setVolume(15.f);
+		this->soundLose.play();
+		this->winFlag = 1;
 	}
 
 
@@ -301,9 +349,12 @@ void GameState::update(sf::RenderWindow* targetWindow)
 
 void GameState::render(sf::RenderWindow* targetWindow)
 {
+	targetWindow->draw(this->backgroundSprite);
 	targetWindow->draw(textAboutPlayer);
 	targetWindow->draw(textAboutEnemy);
-	targetWindow->draw(textEndGame);
+	targetWindow->draw(textYourMap);
+	targetWindow->draw(textEnemyMap);
+	targetWindow->draw(textInfo);
 
 	playerMap->renderMap(targetWindow);
 	enemyMap.renderMap(targetWindow);

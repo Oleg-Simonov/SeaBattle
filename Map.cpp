@@ -4,7 +4,7 @@ Map::PieceOfMap::PieceOfMap()
 {
 	this->value = 0;
 	this->shape.setSize(sf::Vector2f(27.f, 27.f));
-	this->shape.setFillColor(sf::Color::Blue);
+	this->shape.setFillColor(sf::Color(0,153,255,200));
 	this->shape.setOutlineThickness(1.f);
 	this->shape.setOutlineColor(sf::Color::Black);
 	this->shape.getPosition();
@@ -161,13 +161,13 @@ void Map::updateMap(const sf::RenderWindow* window, bool enemyMap)
 			if (this->map[i][j].shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
 				this->map[i][j].shape.setFillColor(sf::Color::Cyan);
 
-			else if (this->map[i][j].value == 2) this->map[i][j].shape.setFillColor(sf::Color::Red);
+			else if (this->map[i][j].value == 2) this->map[i][j].shape.setFillColor(sf::Color(255, 0, 0, 230));
 
-			else if (this->map[i][j].value == 1 && enemyMap == 0) this->map[i][j].shape.setFillColor(sf::Color::White);
+			else if (this->map[i][j].value == 1 && enemyMap == 0) this->map[i][j].shape.setFillColor(sf::Color(255, 255, 255, 230));
 
-			else if (this->map[i][j].value == 3) this->map[i][j].shape.setFillColor(sf::Color::Green);
+			else if (this->map[i][j].value == 3) this->map[i][j].shape.setFillColor(sf::Color(0, 255, 0, 230));
 
-			else this->map[i][j].shape.setFillColor(sf::Color::Blue);
+			else this->map[i][j].shape.setFillColor(sf::Color(0, 102, 255, 230));
 		}
 	}
 }
@@ -417,11 +417,12 @@ bool Map::placeShip(const OutMapShip& outMapShip, const sf::RenderWindow* window
 
 int Map::attack(int attackI, int attackJ)
 {
+	
 	//return 0 - if miss;
 	//return 1 - if the ship has been damaged;
 	//return 2 - if the ship has been destroyed;
 	//return -1 - incorrect parametrs;
-	if ((attackI > this->getSizeI()) || attackJ > this->getSizeJ()) return -1;//out of range check
+	if ((attackI > this->getSizeI()) || attackJ > this->getSizeJ()) return (-1);//out of range check		
 
 	switch (this->map[attackI][attackJ].value)
 	{
@@ -479,7 +480,7 @@ int Map::attack(int attackI, int attackJ)
 			return 0;
 		case 2: //attack the same field second time
 		case 3: //attack the same field second time
-			return 1;
+			return 0;
 	}
 }
 

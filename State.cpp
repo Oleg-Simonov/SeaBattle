@@ -2,6 +2,8 @@
 
 State::State(std::stack<State*>* statesPointer)
 {
+	if (!this->backgroundTexture.loadFromFile("Resources\\Backgrounds\\MainMenuPict.jpg")) std::cout << "textureProblem" << std::endl;
+	else this->backgroundSprite.setTexture(backgroundTexture);
 
 	this->endState = 0;
 
