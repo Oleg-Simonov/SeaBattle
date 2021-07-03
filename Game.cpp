@@ -2,15 +2,16 @@
 
 Game::Game()
 {
+	this->currentState = 0;
+
 	//init window
 	this->videoMode.width = 1200;
 	this->videoMode.height = 630;
 	this->window = new sf::RenderWindow(videoMode, "SeaBattle");
 	this->window->setFramerateLimit(60);
+	this->window->setKeyRepeatEnabled(false);
 
-	this->states.emplace(new PlacingState(&this->states));
-	//this->states.emplace(new MainMenuState(&this->states));
-	//this->states.emplace(new GameState(&this->states));
+	this->states.push_back(new PlacingState(&this->states));
 }
 
 Game::~Game()
@@ -20,9 +21,11 @@ Game::~Game()
 
 	while (!this->states.empty())
 	{
-		delete this->states.top();
-		this->states.pop();
+		delete this->states.back();
+		this->states.back() = nullptr;
+		this->states.pop_back();
 	}
+	//std::cout << "GAME_________DESTR" << std::endl;
 }
 
 bool Game::getWindowStatus() const
@@ -32,47 +35,35 @@ bool Game::getWindowStatus() const
 
 void Game::update()
 {
-
-	//poll events----------------------------------------------------
-	while (this->window->pollEvent(sfEvent))
-	{
-		if (this->sfEvent.type == sf::Event::EventType::Closed)
-			this->window->close();
-	}
-
 	//update current state
 	if (!this->states.empty())
 	{
-		this->states.top()->update(this->window);
-		
-		
-		if (this->states.top()->getEndState() == 1)
-		{
-			delete this->states.top();
-			this->states.pop();
-		}
+		this->states.back()->update(this->window);
 
-		else if (this->states.top()->getEndState() == 2)
+		if (this->states.back()->getEndState() == 1) //restart
 		{
 			while (!this->states.empty())
 			{
-				delete this->states.top();
-				this->states.pop();
+				delete this->states.back();
+				this->states.back() = nullptr;
+				this->states.pop_back();
 			}
-			this->states.emplace(new PlacingState(&this->states));
+
+			this->states.push_back(new PlacingState(&this->states));
 		}
 
-		else if (this->states.top()->getEndState() == 3)
+		if (this->states.back()->getEndState() == -1) //quit
 		{
 			while (!this->states.empty())
 			{
-				delete this->states.top();
-				this->states.pop();
+				delete this->states.back();
+				this->states.back() = nullptr;
+				this->states.pop_back();
 			}
 		}
 	}
-	else this->window->close();
-	
+	else
+		this->window->close();
 }
 
 void Game::render()
@@ -81,7 +72,7 @@ void Game::render()
 
 	//render current state
 	if (!this->states.empty())
-		this->states.top()->render(this->window);
+		this->states.back()->render(this->window);
 	this->window->display();
 }
 

@@ -5,6 +5,8 @@
 #include <SFML/Graphics.hpp>
 #include "Ship.h"
 #include "OutMapShip.h"
+#include "MapCoord.h"
+//#define DEBUG_MAP
 
 class PieceOfMap;
 
@@ -22,14 +24,15 @@ private:
 		~PieceOfMap();
 	};
 
-
 	int mapSizeI, mapSizeJ;
 	int currentShipsAmount, shipsAmount;
+	MapCoord chosenField;
 
 	sf::Font font;
 
 	std::vector<sf::Text> text12345;
 	std::vector<sf::Text> textABCDE;
+	sf::Text textWhoseMap;
 
 	std::vector<std::vector<PieceOfMap>> map; // array which contains information about actions in certain point of map: 
 											  //0 - there ware no any action, 
@@ -45,6 +48,7 @@ private:
 
 public:
 	Map(float coorWindX, float coorWindY, bool enemy = 0);
+	~Map();
 
 	//getters
 	int getSizeI() const;
@@ -53,22 +57,20 @@ public:
 	int getMapValue(int i, int j) const;
 	int getShipsAmount() const;
 	int getCurrentShipsAmount() const;
-	int getProhibitedZoneIJ(int i, int j) const;
-	std::vector<Ship>::const_iterator getShips() const;
+	int getProhibitedZoneIJ(const MapCoord& mapCoord);
+	const MapCoord& getChosenField() const;
 
 	//functions
 	void showProhibitedZone();
-	void calcProhibitedZone(bool dir, int deckAmount);
-	bool calcCoordinanes(bool dir, int deckAmount);
+	void calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable = 0);
+	bool calcCoordinanes(bool dir, int deckAmount, bool isMidAvailable = 0);
 	void randomPlace();
 	void placeShip(const Ship& ship);
-	bool placeShip(const OutMapShip& ship, const sf::RenderWindow* window);
-	int attack(int attackI = 1000, int attackJ = 1000); //if attackI and attackJ are exist then computer attacks player's map
+	bool placeShip(const OutMapShip& ship);
+	int attack(const MapCoord& mapCoord); //if attackI and attackJ are exist then computer attacks player's map
 	void clearMap();
 
 	void updateMap(const sf::RenderWindow* window, bool enemyMap = 0);
 	void renderMap(sf::RenderWindow* targetWindow) const;
-
-	int determinationChosenMapField(const sf::RenderWindow* const window);
 };
 

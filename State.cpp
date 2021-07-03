@@ -1,6 +1,6 @@
 #include "State.h"
 
-State::State(std::stack<State*>* statesPointer)
+State::State(std::vector<State*>* statesPointer)
 {
 	if (!this->backgroundTexture.loadFromFile("Resources\\Backgrounds\\MainMenuPict.jpg")) std::cout << "textureProblem" << std::endl;
 	else this->backgroundSprite.setTexture(backgroundTexture);

@@ -150,8 +150,8 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Legend.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MainMenuState.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="MapCoord.cpp" />
     <ClCompile Include="PlacingState.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="OutMapShip.cpp" />
@@ -162,8 +162,8 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="Legend.h" />
-    <ClInclude Include="MainMenuState.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="MapCoord.h" />
     <ClInclude Include="PlacingState.h" />
     <ClInclude Include="Ship.h" />
     <ClInclude Include="OutMapShip.h" />

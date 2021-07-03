@@ -4,9 +4,9 @@
 #include <cstdlib> // для функций rand() и srand()
 #include <ctime> // для функции time()
 #include <algorithm>
-#include <SFML/Audio.hpp>
+//#define DEBUG_GAMESTATE
 
-class CoordinatesOfStrike;
+//class CoordinatesOfStrike;
 
 class GameState :
     public State
@@ -28,8 +28,6 @@ private:
     sf::Text textAboutPlayer;
     sf::Text textAboutEnemy;
     sf::Text textInfo;
-    sf::Text textYourMap;
-    sf::Text textEnemyMap;
 
     Legend legend = Legend(100, 500);
 
@@ -38,41 +36,17 @@ private:
 
     bool winFlag;
     bool playerMove;
-    int dirCounter;
-    int needComeBack;
 
-    struct ClickFlags
-    {
-        bool mouseLeft;
-        bool againButton;
-        bool quitButton;
-    };
-
-    ClickFlags clickFlags;
     std::map<std::string, Button*> buttons;
-    std::vector<OutMapShip> outMapShip;
     std::vector<int> nonRepeatVector;
-    std::vector<std::vector<int>> knownFields;
-
-    class CoordinatesOfStrike
-    {
-    public:
-        int i, j;
-        CoordinatesOfStrike();
-        CoordinatesOfStrike(int i, int j);
-    };
-
-    CoordinatesOfStrike coorOfStrike;
-    std::vector<CoordinatesOfStrike> damagedDecks;
+    std::vector<MapCoord> damagedDecks;
     
 public:
 
-    GameState(std::stack<State*>* statesPointer, Map* playerMap = nullptr);
+    GameState(std::vector<State*>* statesPointer, Map* playerMap = nullptr);
     ~GameState();
 
-    void coordCalc();
-    void coordCalc(int coorI, int coorJ);
-    void botAttack(sf::RenderWindow* targetWindow, int coorI, int coorJ);
+    void botAttack(int i, int j);
     bool checkField(int coorI, int coorJ);
     void ArtificInt(sf::RenderWindow* targetWindow);
     void update(sf::RenderWindow* targetWindow = nullptr);

@@ -14,15 +14,16 @@ protected:
 	sf::Texture backgroundTexture;
 	sf::Sprite backgroundSprite;
 
-	std::stack<State*>* statesPointer;
+	std::vector<State*>* statesPointer;
 	sf::Vector2i mousePosWindow;
 	sf::Clock clock;
+	sf::Event sfEvent;
 
 	int endState;
 
 public:
-	State(std::stack<State*>* states);
-	~State();
+	State(std::vector<State*>* states);
+	virtual ~State();
 
 	const int getEndState() const;
 	void mouseUpdatePosition(sf::RenderWindow* targetWindow);

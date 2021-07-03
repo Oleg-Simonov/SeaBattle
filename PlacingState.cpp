@@ -1,18 +1,10 @@
 #include "PlacingState.h"
 
-PlacingState::PlacingState(std::stack<State*>* statesPointer) : State(statesPointer)
+PlacingState::PlacingState(std::vector<State*>* statesPointer) : State(statesPointer)
 {
-
 	this->helpTextBackground.setFillColor(sf::Color(70, 70, 70, 175));
 	this->helpTextBackground.setPosition(685.f, 443.f);
 	this->helpTextBackground.setSize(sf::Vector2f(470.f, 180.f));
-
-	//init var
-	clickFlags.mouseLeft = false;
-	clickFlags.space = false;
-	clickFlags.startButton = false;
-	clickFlags.againlButton = false;
-	clickFlags.toMainMenuButton = false;
 
 	//init font
 	if (!this->font.loadFromFile("Fonts\\font.ttf"))	std::cout << "Font error" << std::endl; //should be refined
@@ -32,17 +24,52 @@ PlacingState::PlacingState(std::stack<State*>* statesPointer) : State(statesPoin
 		"   3) If you chose area for ship and the ship is painted in green color,\n click left mouse button again.";
 	helpText.setString(ss.str());
 
-	yourMapText.setFont(font);
-	yourMapText.setCharacterSize(21);
-	yourMapText.setPosition(sf::Vector2f(115, 65));
-	yourMapText.setString("Your map:");
-
 	yourShipsText.setFont(font);
 	yourShipsText.setCharacterSize(21);
 	yourShipsText.setPosition(sf::Vector2f(100, 430));
 	yourShipsText.setString("Your ships:");
 
 	//init ships for placing
+	this->initOutMapShips();
+
+	//init buttons
+	this->buttons["START_GAME"] = new Button(500, 40, 215, 55,
+		&this->font, "Start game!",
+		sf::Color(255, 50, 50, 200), sf::Color(255, 0, 0, 200), sf::Color(0, 0, 255, 200));
+
+	this->buttons["RANDOM"] = new Button(830, 130, 170, 50,
+		&this->font, "Randomize",
+		sf::Color(0, 101, 151, 200), sf::Color(0, 102, 255, 200), sf::Color(0, 0, 255, 200));
+
+	this->buttons["AGAIN"] = new Button(830, 230, 170, 50,
+		&this->font, "Place again",
+		sf::Color(0, 101, 151, 200), sf::Color(0, 102, 255, 200), sf::Color(0, 0, 255, 200));
+
+	this->buttons["QUIT"] = new Button(830, 330, 170, 50,
+		&this->font, "Quit",
+		sf::Color(0, 101, 151, 200), sf::Color(0, 102, 255, 200), sf::Color(0, 0, 255, 200));
+
+	//init sounds
+	if (!soundBufferPlacing.loadFromFile("Resources\\Sounds\\placing.wav")) std::cout << "sound error" << std::endl; //should be refined
+	this->soundPlacing.setBuffer(soundBufferPlacing);
+	this->soundPlacing.setVolume(15.f);
+
+	if (!soundBufferFlipShip.loadFromFile("Resources\\Sounds\\ShipFlip.wav")) std::cout << "sound error" << std::endl; //should be refined
+	this->soundFlipShip.setBuffer(soundBufferFlipShip);
+	this->soundFlipShip.setVolume(35.f);
+
+	//std::cout << "CONSTR______END______Placing" << std::endl;
+}
+
+PlacingState::~PlacingState()
+{ 
+	for (auto it : this->buttons)
+		delete it.second;
+	//std::cout << "DESTR____________Placing" << std::endl;
+}
+
+void PlacingState::initOutMapShips()
+{
 	int distance = 0;
 	int shipsForRandPlacing[5];
 	shipsForRandPlacing[0] = 4;	//1 deck
@@ -58,7 +85,7 @@ PlacingState::PlacingState(std::stack<State*>* statesPointer) : State(statesPoin
 		while (shipsForRandPlacing[i])
 		{
 			//init outMapShipsTable
-			this->outMapShipsTable[j].setFillColor(sf::Color(51,51,51,0));
+			this->outMapShipsTable[j].setFillColor(sf::Color(51, 51, 51, 0));
 			this->outMapShipsTable[j].setOutlineThickness(1);
 			this->outMapShipsTable[j].setPosition((float)(100 + distance - 2.5), (float)(470 - 3.5));
 			this->outMapShipsTable[j].setSize(sf::Vector2f(33.f, (float)((i + 1) * 27 + i + 7)));
@@ -70,240 +97,109 @@ PlacingState::PlacingState(std::stack<State*>* statesPointer) : State(statesPoin
 			shipsForRandPlacing[i]--;
 		}
 	}
-
-	
-//this->table.setFillColor(sf::Color(051, 051, 051, 150));
-
-
-	
-	/*outMapShip.emplace_back(750, 50, 4);
-	outMapShip.emplace_back(750 + distance, 50, 3);
-	outMapShip.emplace_back(750, 50, 3);
-	outMapShip.emplace_back(750, 50, 2);
-	outMapShip.emplace_back(750, 50, 2);
-	outMapShip.emplace_back(750, 50, 2);
-	outMapShip.emplace_back(750, 50, 1);
-	outMapShip.emplace_back(750, 50, 1);
-	outMapShip.emplace_back(750, 50, 1);
-	outMapShip.emplace_back(750, 50, 1);*/
-
-	//init buttons
-	this->buttons2["START_GAME"] = new Button(500, 40, 215, 55,
-		&this->font, "Start game!",
-		sf::Color(255, 50, 50, 200), sf::Color(255, 0, 0, 200), sf::Color(0, 0, 255, 200));
-
-	this->buttons2["RANDOM"] = new Button(830, 130, 170, 50,
-		&this->font, "Place randomly",
-		sf::Color(0, 101, 151, 200), sf::Color(0, 102, 255, 200), sf::Color(0, 0, 255, 200));
-
-	this->buttons2["AGAIN"] = new Button(830, 230, 170, 50,
-		&this->font, "Place again",
-		sf::Color(0, 101, 151, 200), sf::Color(0, 102, 255, 200), sf::Color(0, 0, 255, 200));
-
-	this->buttons2["QUIT"] = new Button(830, 330, 170, 50,
-		&this->font, "Quit",
-		sf::Color(0, 101, 151, 200), sf::Color(0, 102, 255, 200), sf::Color(0, 0, 255, 200));
-
-	//init sounds
-	if (!soundBufferPlacing.loadFromFile("Resources\\Sounds\\placing.wav")) std::cout << "sound error" << std::endl; //should be refined
-	this->soundPlacing.setBuffer(soundBufferPlacing);
-	this->soundPlacing.setVolume(15.f);
-
-	if (!soundBufferFlipShip.loadFromFile("Resources\\Sounds\\ShipFlip.wav")) std::cout << "sound error" << std::endl; //should be refined
-	this->soundFlipShip.setBuffer(soundBufferFlipShip);
-	this->soundFlipShip.setVolume(35.f);
-}
-
-PlacingState::~PlacingState()
-{
-	for (auto it : this->buttons2)
-		delete it.second;
 }
 
 void PlacingState::update(sf::RenderWindow* targetWindow)
 {	
+	for (auto it : this->buttons)
+		it.second->update(sf::Vector2f((float)this->mousePosWindow.x, (float)this->mousePosWindow.y));
+
 	if (this->outMapShip.size() == 0)
 	{
 		headerText.setString("");
-		this->buttons2["START_GAME"]->setVisible(1);
+		this->buttons["START_GAME"]->setVisible(1);
 	}
 	else
 	{
-		this->buttons2["START_GAME"]->setVisible(0);
+		this->buttons["START_GAME"]->setVisible(0);
 		headerText.setString("Place your ships on the map");
 	}
-	
-	//mouse poll----------------------------------------------------
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !this->clickFlags.mouseLeft) // передний фронт
-	{
 
-		for (size_t i = 0; i < this->outMapShip.size(); i++)
+	//Sleep(1000);
+	
+	while (targetWindow->pollEvent(sfEvent))
+	{
+		//std::cout << sfEvent.type << std::endl;
+
+		if (this->sfEvent.type == sf::Event::EventType::Closed)
+			targetWindow->close();
+
+		else if (this->sfEvent.type == sfEvent.MouseButtonPressed && this->sfEvent.mouseButton.button == sf::Mouse::Button::Left)
 		{
-			//if cursor hover over the ship, we will grab it
-			if (this->outMapShip[i].shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*targetWindow).x, (float)sf::Mouse::getPosition(*targetWindow).y) && this->outMapShip[i].getGrab() == false)
+			//playerMap.placeShip(this->outMapShip[0], targetWindow);
+			//std::cout << "MouseButtonPressed" << std::endl;
+			for (size_t i = 0; i < this->outMapShip.size(); i++)
 			{
-				this->outMapShip[i].setGrab(true);
+				//if cursor hover over the ship, we will grab it
+				if (this->outMapShip[i].shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*targetWindow).x, (float)sf::Mouse::getPosition(*targetWindow).y) && this->outMapShip[i].getGrab() == false)
+				{
+					this->outMapShip[i].setGrab(true);
+				}
+				//if placing has been successful, we will lessen quantity of unplacing ships
+				else if (this->outMapShip[i].getGrab() == true && playerMap.placeShip(this->outMapShip[i]))
+				{
+					this->outMapShip.erase(this->outMapShip.begin() + i);
+					this->soundPlacing.play();
+				}
+				//else we revert the ship to initial position
+				else
+				{
+					this->outMapShip[i].setGrab(false);
+				}
 			}
-			//if placing has been successful, we will lessen quantity of unplacing ships
-			else if (this->outMapShip[i].getGrab() == true && playerMap.placeShip(this->outMapShip[i], targetWindow))
+
+			if (buttons["START_GAME"]->isPressed() && this->outMapShip.size() == 0)
+				//this->statesPointer->push(new GameState(statesPointer, &playerMap));
 			{
-				std::cout << "grabgfdgdfgdgdfgdfgd " << this->outMapShip.size() << std::endl;
-				this->outMapShip.erase(this->outMapShip.begin() + i);
+				this->statesPointer->push_back(new GameState(statesPointer, &playerMap));
+			}
+
+			if (buttons["RANDOM"]->isPressed())
+			{
+				this->playerMap.randomPlace();
+				outMapShip.clear();
 				this->soundPlacing.play();
 			}
-			//else we revert the ship to initial position
-			else
-			{
-				this->outMapShip[i].setGrab(false);
 
+			if (buttons["AGAIN"]->isPressed())
+			{
+				this->playerMap.clearMap();
+				this->outMapShip.clear();
+				this->initOutMapShips();
+				this->soundPlacing.play();
+			}
+
+			if (buttons["QUIT"]->isPressed())
+				this->endState = -1;
+		}
+
+		else if (this->sfEvent.type == sfEvent.KeyPressed && this->sfEvent.key.code == sf::Keyboard::Space)
+		{
+			for (size_t i = 0; i < this->outMapShip.size(); i++)
+			{
+				if (this->outMapShip[i].getGrab())
+				{
+					this->outMapShip[i].setDirection();
+					this->soundFlipShip.play();
+				}
 			}
 		}
-
-		clickFlags.mouseLeft = true;
-	}
-
-	if (!sf::Mouse::isButtonPressed(sf::Mouse::Left) && this->clickFlags.mouseLeft) // задний фронт
-	{
-		clickFlags.mouseLeft = false;
-	}
-
-	//space poll----------------------------------------------------
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && !this->clickFlags.space)
-	{
-		this->soundFlipShip.play();
-		for (size_t i = 0; i < this->outMapShip.size(); i++)
-			if (this->outMapShip[i].getGrab()) this->outMapShip[i].setDirection();
-
-		this->clickFlags.space = true;
-	}
-
-	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && this->clickFlags.space)
-	{
-		this->clickFlags.space = false;
-	}
-
-	
-
-	if (buttons2["START_GAME"]->isPressed() && !this->clickFlags.startButton)
-	{
-		if (this->outMapShip.size() == 0) 
-		{
-			//this->playerMap.getMapValue();
-
-			this->statesPointer->push(new GameState(statesPointer, &playerMap));
-		}
-
-		else
-		{
-			clock.restart();
-			//this->infoText.setPosition(550, 550);
-			//infoText.setString("Place your ships on the map!");
-		}
-
-		this->clickFlags.startButton = true;
-	}
-
-	if (!buttons2["START_GAME"]->isPressed() && this->clickFlags.startButton)
-	{
-		this->clickFlags.startButton = false;
-	}
-
-	if (buttons2["RANDOM"]->isPressed() && !this->clickFlags.randomButton)
-	{
-		this->playerMap.randomPlace();
-		outMapShip.clear();
-		this->soundPlacing.play();
-
-		this->clickFlags.randomButton= true;
-	}
-
-	if (!buttons2["RANDOM"]->isPressed() && this->clickFlags.randomButton)
-	{
-		this->clickFlags.randomButton = false;
-	}
-
-	if (buttons2["AGAIN"]->isPressed() && !this->clickFlags.againlButton)
-	{
-		this->playerMap.clearMap();
-		this->outMapShip.clear();
-		this->soundPlacing.play();
-
-		//init ships for placing
-		int distance = 0;
-		int shipsForRandPlacing[5];
-		shipsForRandPlacing[0] = 4;	//1 deck
-		shipsForRandPlacing[1] = 3; //2 deck
-		shipsForRandPlacing[2] = 2; //3 deck
-		shipsForRandPlacing[3] = 1; //4 deck
-		shipsForRandPlacing[4] = 0; //5 deck
-
-		for (int i = 4; i >= 0; i--)
-		{
-			while (shipsForRandPlacing[i])
-			{
-				outMapShip.emplace_back(100 + distance, 470, i + 1);
-				distance = distance + 34;
-				shipsForRandPlacing[i]--;
-			}
-		}
-
-		this->clickFlags.againlButton = true;
-	}
-
-	if (!buttons2["AGAIN"]->isPressed() && this->clickFlags.againlButton)
-	{
-		this->clickFlags.againlButton = false;
-	}
-
-	if (buttons2["QUIT"]->isPressed() && !this->clickFlags.toMainMenuButton)
-	{
-
-		this->endState = 1; 
-
-		this->clickFlags.toMainMenuButton = true;
-	}
-
-	if (!buttons2["QUIT"]->isPressed() && this->clickFlags.toMainMenuButton)
-	{
-		this->clickFlags.toMainMenuButton = false;
 	}
 
 	playerMap.updateMap(targetWindow);
 
-
-
-
-
-	
-
 	for (size_t shipCounter = 0; shipCounter < this->outMapShip.size(); shipCounter++)
 	{
-		int number = this->playerMap.determinationChosenMapField(targetWindow);
-
-		//std::cout << chosenField[0] << " ----- " << chosenField[1] << std::endl;
-
-		if(number > 100) outMapShip[shipCounter].update(targetWindow, -1);
+		if(this->playerMap.getChosenField().i == -1) outMapShip[shipCounter].update(targetWindow, -1);
 		else 
 		{
-			this->playerMap.calcProhibitedZone(outMapShip[shipCounter].getDirection(), outMapShip[shipCounter].getDeckAmount());
-			int coorJ = number % 10;
-			int coorI = (number - coorJ) / 10;
-
-
-			outMapShip[shipCounter].update(targetWindow, this->playerMap.getProhibitedZoneIJ(coorI, coorJ));
+			this->playerMap.calcProhibitedZone(outMapShip[shipCounter].getDirection(), outMapShip[shipCounter].getDeckAmount(), 1);
+			outMapShip[shipCounter].update(targetWindow, this->playerMap.getProhibitedZoneIJ(this->playerMap.getChosenField()));
 		}
-
 	}
 		
-
 	this->mouseUpdatePosition(targetWindow);
 
-	for(auto it : this->buttons2)
-		it.second->update(sf::Vector2f((float)this->mousePosWindow.x, (float)this->mousePosWindow.y));
-
-	//if (clock.getElapsedTime().asSeconds() > 3)
-	//	infoText.setString("");
-	//std::cout << buttons["START_GAME"]->isPressed() << std::endl;
 }
 
 void PlacingState::render(sf::RenderWindow* targetWindow)
@@ -312,7 +208,6 @@ void PlacingState::render(sf::RenderWindow* targetWindow)
 	targetWindow->draw(this->headerText);
 	targetWindow->draw(this->helpTextBackground);
 	targetWindow->draw(this->helpText);
-	targetWindow->draw(this->yourMapText);
 	targetWindow->draw(this->yourShipsText);
 	
 
@@ -324,6 +219,6 @@ void PlacingState::render(sf::RenderWindow* targetWindow)
 	for (size_t i = 0; i < this->outMapShip.size(); i++)
 		outMapShip[i].render(targetWindow);
 
-	for (auto it : this->buttons2)
+	for (auto it : this->buttons)
 		it.second->render(targetWindow);
 }

@@ -34,6 +34,7 @@ Button::Button(float x, float y, float width, float height,
 
 Button::~Button()
 {
+	//std::cout << "BUTTON_____________DESTR" << std::endl;
 }
 
 const bool Button::isPressed() const
