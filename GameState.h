@@ -4,9 +4,7 @@
 #include <cstdlib> // для функций rand() и srand()
 #include <ctime> // для функции time()
 #include <algorithm>
-//#define DEBUG_GAMESTATE
-
-//class CoordinatesOfStrike;
+#include <windows.h>
 
 class GameState :
     public State
@@ -38,7 +36,6 @@ private:
     bool playerMove;
 
     std::map<std::string, Button*> buttons;
-    std::vector<int> nonRepeatVector;
     std::vector<MapCoord> damagedDecks;
     
 public:
@@ -48,7 +45,7 @@ public:
 
     void botAttack(int i, int j);
     bool checkField(int coorI, int coorJ);
-    void ArtificInt(sf::RenderWindow* targetWindow);
+    void ArtificInt();
     void update(sf::RenderWindow* targetWindow = nullptr);
     void render(sf::RenderWindow* targetWindow = nullptr);
 };

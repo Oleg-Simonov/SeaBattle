@@ -6,6 +6,7 @@
 #include "Ship.h"
 #include "OutMapShip.h"
 #include "MapCoord.h"
+#include <windows.h>
 //#define DEBUG_MAP
 
 class PieceOfMap;
@@ -44,6 +45,7 @@ private:
 
 	std::vector<std::vector<int>> prohibitedZone;
 	std::vector<int> nonRepeatVector;
+
 	std::vector<Ship> ships;
 
 public:
@@ -59,18 +61,25 @@ public:
 	int getCurrentShipsAmount() const;
 	int getProhibitedZoneIJ(const MapCoord& mapCoord);
 	const MapCoord& getChosenField() const;
+	const std::vector<Ship>& getShips() const;
+	void showProhibitedZone() const;
 
 	//functions
-	void showProhibitedZone();
-	void calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable = 0);
-	bool calcCoordinanes(bool dir, int deckAmount, bool isMidAvailable = 0);
-	void randomPlace();
-	void placeShip(const Ship& ship);
-	bool placeShip(const OutMapShip& ship);
 	int attack(const MapCoord& mapCoord); //if attackI and attackJ are exist then computer attacks player's map
 	void clearMap();
 
-	void updateMap(const sf::RenderWindow* window, bool enemyMap = 0);
+	void calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable = 0);
+	bool calcCoordinanes(bool dir, int deckAmount, bool isMidAvailable = 0);
+	void placeShip(const Ship& ship);
+	bool placeShip(const OutMapShip& ship);
+	void randomPlace(int quant1deckShip, int quant2deckShip, int quant3deckShip, int quant4deckShip, int quant5deckShip);
+	void randomPlaceForComputer();
+	void mapTemplates(int number);
+	void turn2dArray(int degree);
+	void reflect2dArray();
+	
+
+	void updateMap(const sf::Vector2f& mousePos, bool enemyMap = 0);
 	void renderMap(sf::RenderWindow* targetWindow) const;
 };
 

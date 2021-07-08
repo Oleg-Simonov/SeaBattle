@@ -50,7 +50,7 @@ void Button::setVisible(bool value)
 	this->visible = value;
 }
 
-void Button::update(const sf::Vector2f mousePos)
+void Button::update(const sf::Vector2f& mousePos)
 {
 	if (visible)
 	{

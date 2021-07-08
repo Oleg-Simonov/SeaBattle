@@ -3,6 +3,7 @@
 #include <string>
 #include "State.h"
 #include "GameState.h"
+#include <windows.h>
 
 class PlacingState :
     public State

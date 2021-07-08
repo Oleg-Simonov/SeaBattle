@@ -7,8 +7,8 @@ PlacingState::PlacingState(std::vector<State*>* statesPointer) : State(statesPoi
 	this->helpTextBackground.setSize(sf::Vector2f(470.f, 180.f));
 
 	//init font
-	if (!this->font.loadFromFile("Fonts\\font.ttf"))	std::cout << "Font error" << std::endl; //should be refined
-
+	if (!this->font.loadFromFile("Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error PlacingState", (LPCWSTR)L"Error message", 0);
+	
 	//init text
 	headerText.setFont(font);
 	headerText.setCharacterSize(30);
@@ -50,11 +50,11 @@ PlacingState::PlacingState(std::vector<State*>* statesPointer) : State(statesPoi
 		sf::Color(0, 101, 151, 200), sf::Color(0, 102, 255, 200), sf::Color(0, 0, 255, 200));
 
 	//init sounds
-	if (!soundBufferPlacing.loadFromFile("Resources\\Sounds\\placing.wav")) std::cout << "sound error" << std::endl; //should be refined
+	if (!soundBufferPlacing.loadFromFile("Resources\\Sounds\\placing.wav")) MessageBox(0, (LPCWSTR)L"Sound soundBufferPlacing error", (LPCWSTR)L"Error message", 0);
 	this->soundPlacing.setBuffer(soundBufferPlacing);
 	this->soundPlacing.setVolume(15.f);
 
-	if (!soundBufferFlipShip.loadFromFile("Resources\\Sounds\\ShipFlip.wav")) std::cout << "sound error" << std::endl; //should be refined
+	if (!soundBufferFlipShip.loadFromFile("Resources\\Sounds\\ShipFlip.wav")) MessageBox(0, (LPCWSTR)L"Sound soundBufferFlipShip error", (LPCWSTR)L"Error message", 0);
 	this->soundFlipShip.setBuffer(soundBufferFlipShip);
 	this->soundFlipShip.setVolume(35.f);
 
@@ -101,8 +101,10 @@ void PlacingState::initOutMapShips()
 
 void PlacingState::update(sf::RenderWindow* targetWindow)
 {	
+	this->mouseUpdatePosition(targetWindow);
+
 	for (auto it : this->buttons)
-		it.second->update(sf::Vector2f((float)this->mousePosWindow.x, (float)this->mousePosWindow.y));
+		it.second->update(this->mousePosWindowf);
 
 	if (this->outMapShip.size() == 0)
 	{
@@ -131,7 +133,7 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 			for (size_t i = 0; i < this->outMapShip.size(); i++)
 			{
 				//if cursor hover over the ship, we will grab it
-				if (this->outMapShip[i].shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*targetWindow).x, (float)sf::Mouse::getPosition(*targetWindow).y) && this->outMapShip[i].getGrab() == false)
+				if (this->outMapShip[i].shape.getGlobalBounds().contains(this->mousePosWindowf) && this->outMapShip[i].getGrab() == false)
 				{
 					this->outMapShip[i].setGrab(true);
 				}
@@ -149,14 +151,17 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 			}
 
 			if (buttons["START_GAME"]->isPressed() && this->outMapShip.size() == 0)
-				//this->statesPointer->push(new GameState(statesPointer, &playerMap));
 			{
 				this->statesPointer->push_back(new GameState(statesPointer, &playerMap));
+				return; // return is required for speed up change state. Otherwise there is a petty bug when you press "Start game" button many times very fast 
 			}
+				
 
 			if (buttons["RANDOM"]->isPressed())
 			{
-				this->playerMap.randomPlace();
+				//this->playerMap.randomPlace();
+				this->playerMap.clearMap();
+				this->playerMap.randomPlace(4, 3, 2, 1, 0);
 				outMapShip.clear();
 				this->soundPlacing.play();
 			}
@@ -186,7 +191,7 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 		}
 	}
 
-	playerMap.updateMap(targetWindow);
+	playerMap.updateMap(this->mousePosWindowf);
 
 	for (size_t shipCounter = 0; shipCounter < this->outMapShip.size(); shipCounter++)
 	{
@@ -198,7 +203,7 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 		}
 	}
 		
-	this->mouseUpdatePosition(targetWindow);
+	
 
 }
 

@@ -37,6 +37,37 @@ int Ship::getShipHp() const
 	return this->hp;
 }
 
+void Ship::turn(int mapSize)
+{
+	//turnededArray[i][j] = initialArray[size - 1 - j][i];
+	//turnededArray[i][j] = initialArray[j][size - 1 - i];
+	//turnededArray[i][j] = initialArray[j][size - 1 - i]; //counterclockwise
+	if ((this->headShipJ <= mapSize / 2 || this->headShipJ >= mapSize / 2) && this->direction == 0)
+	{
+		int temp = this->headShipI;
+		this->headShipI = mapSize - 1 - headShipJ;
+		this->headShipJ = temp;
+		this->direction = !this->direction;
+	}
+	else if ((this->headShipI >= mapSize / 2 || this->headShipI <= mapSize / 2) && this->direction == 1)
+	{
+		int temp = this->headShipI;
+		this->headShipI = mapSize - this->deckAmount - headShipJ;
+		this->headShipJ = temp;
+		this->direction = !this->direction;
+	}
+}
+
+
+void Ship::reflect(int mapSize)
+{
+	//reflectedArray[i][j] = initialArray[size - 1 - i][j];
+	if (this->direction)
+		this->headShipI = mapSize - 1 - this->headShipI;
+	else
+		this->headShipI = mapSize - (headShipI + this->deckAmount);
+}
+
 int Ship::isItDamage(int attakI, int attakJ)
 {
 	for (int i = 0; i < this->deckAmount; i++)

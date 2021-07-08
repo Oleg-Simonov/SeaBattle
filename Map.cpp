@@ -21,9 +21,10 @@ Map::Map(float coorWindX, float coorWindY, bool enemy) : prohibitedZone(10, std:
 	std::cout << "----------Map Construcror1----------" << std::endl;
 #endif
 	//init font
-	if (!this->font.loadFromFile("Fonts\\font.ttf"))	std::cout << "FontMap error" << std::endl; //should be refined
-	
+	if (!this->font.loadFromFile("Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error GameState", (LPCWSTR)L"Error message", 0);
+
 	//init var
+	this->currentShipsAmount = 0;
 	this->shipsAmount = 0;
 	this->mapSizeI = 10;
 	this->mapSizeJ = 10;
@@ -63,7 +64,7 @@ Map::Map(float coorWindX, float coorWindY, bool enemy) : prohibitedZone(10, std:
 	
 	if (enemy)
 	{
-		this->randomPlace();
+		this->randomPlaceForComputer();
 		textWhoseMap.setString("Enemy's map:");
 	}
 
@@ -101,7 +102,7 @@ void Map::getMapValue() const
 		{
 			for (int j = 0; j < this->mapSizeJ; j++)
 			{
-				std::cout << map[i][j].value << "\t";
+				std::cout << map[i][j].value << " ";
 			}
 			std::cout << std::endl;
 		}
@@ -135,7 +136,13 @@ int Map::getProhibitedZoneIJ(const MapCoord& mapCoord)
 	else return -1;
 }
 
-void Map::showProhibitedZone()
+
+const std::vector<Ship>& Map::getShips() const
+{
+	return this->ships;
+}
+
+void Map::showProhibitedZone() const
 {
 	for (size_t i = 0; i < this->prohibitedZone.size(); i++)
 	{
@@ -146,6 +153,89 @@ void Map::showProhibitedZone()
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
+}
+
+int Map::attack(const MapCoord& mapCoord)
+{
+	//return 0 - if miss;
+	//return 1 - if the ship has been damaged;
+	//return 2 - if the ship has been destroyed;
+	//return -1 - incorrect parametrs;
+	if (mapCoord.i == -1) return (-1);//out of range check		
+
+	if (this->map[mapCoord.i][mapCoord.j].value == 1) //gotcha
+	{
+		for (size_t shipCounter = 0; shipCounter < this->ships.size(); shipCounter++)
+		{
+			if (this->ships[shipCounter].isItDamage(mapCoord.i, mapCoord.j)) //which ship has been damaged?
+			{
+				this->map[mapCoord.i][mapCoord.j].value = 2;
+
+				if (this->ships[shipCounter].getShipHp() == 0) //has the ship been destoyed?
+				{
+					this->currentShipsAmount--;
+
+					//fixation area where another ship can't be
+					int coorShipHeadI = this->ships[shipCounter].getI();
+					int coorShipHeadJ = this->ships[shipCounter].getJ();
+
+					if (this->ships[shipCounter].getDirection()) //horizontal
+					{
+						for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
+						{
+							for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); j++)
+							{
+								if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
+								{
+									if (this->map[i][j].value == 0) this->map[i][j].value = 3;
+								}
+
+							}
+						}
+					}
+					else //vertical
+					{
+						for (int i = coorShipHeadI - 1; i <= coorShipHeadI + this->ships[shipCounter].getDeckAmount(); i++)
+						{
+							for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + 1; j++)
+							{
+								if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
+								{
+									if (this->map[i][j].value == 0) this->map[i][j].value = 3;
+								}
+							}
+						}
+					}
+					return 2;
+				}
+			}
+		}
+		return 1;
+	}
+	else if (this->map[mapCoord.i][mapCoord.j].value == 0) //miss
+	{
+		this->map[mapCoord.i][mapCoord.j].value = 3;
+		return 0;
+	}
+	else if (this->map[mapCoord.i][mapCoord.j].value == 2 || this->map[mapCoord.i][mapCoord.j].value == 3) //attack the same field second time
+		return 0;
+	else
+		return -2; //somthing was going wrong
+}
+
+void Map::clearMap()
+{
+	this->ships.clear();
+	for (int i = 0; i < this->mapSizeI; i++)
+	{
+		this->map[i].resize(mapSizeJ);
+		for (int j = 0; j < this->mapSizeJ; j++)
+		{
+			this->map[i][j].value = 0;
+		}
+	}
+	this->shipsAmount = 0;
+	this->currentShipsAmount = 0;
 }
 
 void Map::calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable)
@@ -159,9 +249,9 @@ void Map::calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable)
 		}
 	}
 
-	for (size_t i = 0; i < this->prohibitedZone.size(); i++)
+	for (int i = 0; i < mapSizeI; i++)
 	{
-		for (size_t j = 0; j < this->prohibitedZone.size(); j++)
+		for (int j = 0; j < mapSizeJ; j++)
 		{
 			if (isMidAvailable == 0)
 			{
@@ -278,9 +368,8 @@ void Map::calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable)
 
 bool Map::calcCoordinanes(bool dir, int deckAmount, bool isMidAvailable)
 {
-#ifdef DEBUG_MAP
-	std::cout << "na4alo" << " dir = " << dir <<  std::endl;
-#endif
+	//std::cout << "na4alo" << " dir = " << dir <<  std::endl;
+
 	calcProhibitedZone(dir, deckAmount, isMidAvailable);
 
 
@@ -304,9 +393,9 @@ bool Map::calcCoordinanes(bool dir, int deckAmount, bool isMidAvailable)
 		int randomNunber = rand() % this->nonRepeatVector.size();
 		int coorJ = nonRepeatVector[randomNunber] % 10;
 		int coorI = (nonRepeatVector[randomNunber] - coorJ) / 10;
-#ifdef DEBUG_MAP
-		std::cout << " nonRepeatVector = " << nonRepeatVector[randomNunber] << " coorI = " << coorI << " j = " << coorJ << std::endl;
-#endif
+
+		//std::cout << " nonRepeatVector = " << nonRepeatVector[randomNunber] << " coorI = " << coorI << " j = " << coorJ << std::endl;
+
 		this->ships.emplace_back(coorI, coorJ, dir, deckAmount);
 		this->placeShip(*(ships.end() - 1));
 		return 1;
@@ -314,16 +403,16 @@ bool Map::calcCoordinanes(bool dir, int deckAmount, bool isMidAvailable)
 	else return 0;
 }
 
-void Map::randomPlace()
+void Map::randomPlace(int quant1deckShip, int quant2deckShip, int quant3deckShip, int quant4deckShip, int quant5deckShip)
 {
 	int shipsForRandPlacing[5];
-	shipsForRandPlacing[0] = 4;	//1 deck
-	shipsForRandPlacing[1] = 3; //2 deck
-	shipsForRandPlacing[2] = 2; //3 deck
-	shipsForRandPlacing[3] = 1; //4 deck
-	shipsForRandPlacing[4] = 0; //5 deck
+	shipsForRandPlacing[0] = quant1deckShip;	//1 deck
+	shipsForRandPlacing[1] = quant2deckShip; //2 deck
+	shipsForRandPlacing[2] = quant3deckShip; //3 deck
+	shipsForRandPlacing[3] = quant4deckShip; //4 deck
+	shipsForRandPlacing[4] = quant5deckShip; //5 deck
 
-	this->clearMap();
+	//this->clearMap();
 
 	for (int i = 4; i >= 0; i--)
 	{
@@ -337,9 +426,7 @@ void Map::randomPlace()
 				{
 					if (!calcCoordinanes(!dir, i + 1))
 					{
-#ifdef DEBUG_MAP
-						std::cout << "Placing ERROR " << i + 1 << std::endl;
-#endif
+						MessageBox(0, (LPCWSTR)L"Placing ERROR 1", (LPCWSTR)L"Error message", 0);
 						i = 0;
 						break;
 					}
@@ -349,14 +436,126 @@ void Map::randomPlace()
 			{
 				if (!calcCoordinanes(!dir, i + 1, 1))
 				{
-#ifdef DEBUG_MAP
-					std::cout << "Placing ERROR " << i + 1 << std::endl;
-#endif
+					MessageBox(0, (LPCWSTR)L"Placing ERROR 2", (LPCWSTR)L"Error message", 0);
 					i = 0;
 					break;
 				}
 			}
 		}
+	}
+}
+
+void Map::randomPlaceForComputer()
+{
+	//the most effective way of placing ships is place ships on the edge of map or group big ships in one pack
+	//in my implementation I determined three effective pattern manually. The program choose one of them randomly, also there is a chance to get fully random map.
+	//afterward the program decide whether reflect or flip gotten set of ships. Thus we get plenty variations of effective maps.     
+	this->clearMap();
+	int randomMap = rand() % 100 + 1;
+	if (randomMap < 25)
+	{
+		this->mapTemplates(1);
+	}
+	else if (randomMap >= 25 && randomMap < 50)
+	{
+		this->mapTemplates(2);
+	}
+	else if (randomMap >= 50 && randomMap < 75)
+	{
+		this->mapTemplates(3);
+	}
+	else
+	{
+		this->randomPlace(4, 3, 2, 1, 0);
+		return;
+	}
+
+	if (rand() % 2)
+		this->reflect2dArray();
+
+	switch (rand() % 4 + 1)
+	{
+	case 1:
+		this->turn2dArray(1);
+		break;
+	case 2:
+		this->turn2dArray(2);
+		break;
+	case 3:
+		this->turn2dArray(3);
+		break;
+	case 4:
+		break;
+	default:
+		//std::cout << "errrrror2" << std::endl;
+		break;
+	}
+
+	for (size_t i = 0; i < this->ships.size(); i++)
+	{
+		this->placeShip(this->ships[i]);
+	}
+	this->getMapValue();
+	std::cout << std::endl;
+
+	this->randomPlace(4, 0, 0, 0, 0);
+}
+
+void Map::mapTemplates(int number)
+{
+	this->clearMap();
+
+	switch (number)
+	{
+	case 1:
+		this->ships.emplace_back(0, 0, 0, 4);
+		this->ships.emplace_back(5, 0, 0, 2);
+		this->ships.emplace_back(8, 0, 0, 2);
+		this->ships.emplace_back(0, 2, 0, 3);
+		this->ships.emplace_back(4, 2, 0, 3);
+		this->ships.emplace_back(8, 2, 0, 2);
+		break;
+	case 2:
+		this->ships.emplace_back(0, 0, 0, 4);
+		this->ships.emplace_back(5, 0, 0, 3);
+		this->ships.emplace_back(0, 2, 1, 3);
+		this->ships.emplace_back(9, 0, 1, 2);
+		this->ships.emplace_back(0, 6, 1, 2);
+		this->ships.emplace_back(0, 9, 0, 2);
+		break;
+	case 3:
+		this->ships.emplace_back(0, 0, 0, 4);
+		this->ships.emplace_back(0, 9, 0, 3);
+		this->ships.emplace_back(4, 9, 0, 3);
+		this->ships.emplace_back(5, 0, 0, 2);
+		this->ships.emplace_back(8, 0, 0, 2);
+		this->ships.emplace_back(8, 9, 0, 2);
+		break;
+	default:
+		break;
+	}
+}
+
+void Map::turn2dArray(int degree)
+{
+	for (size_t i = 0; i < this->ships.size(); i++)
+		this->ships[i].turn(this->getSizeI());
+
+	degree--;
+	if (degree)
+	{
+		//std::cout << "recursion" << std::endl;
+		turn2dArray(degree);
+	}
+	else
+		return;
+}
+
+void Map::reflect2dArray()
+{
+	for (size_t i = 0; i < this->ships.size(); i++)
+	{
+		this->ships[i].reflect(this->getSizeI());
 	}
 }
 
@@ -397,91 +596,7 @@ bool Map::placeShip(const OutMapShip& outMapShip) //for player's ships
 	return 0;
 }
 
-
-int Map::attack(const MapCoord& mapCoord)
-{
-	
-	//return 0 - if miss;
-	//return 1 - if the ship has been damaged;
-	//return 2 - if the ship has been destroyed;
-	//return -1 - incorrect parametrs;
-	if (mapCoord.i == -1) return (-1);//out of range check		
-
-	switch (this->map[mapCoord.i][mapCoord.j].value)
-	{
-		case 1: //gotcha
-			for (size_t shipCounter = 0; shipCounter < this->ships.size(); shipCounter++)
-			{
-				if (this->ships[shipCounter].isItDamage(mapCoord.i, mapCoord.j)) //which ship has been damaged?
-				{
-					this->map[mapCoord.i][mapCoord.j].value = 2;
-
-					if (this->ships[shipCounter].getShipHp() == 0) //has the ship been destoyed?
-					{
-						this->currentShipsAmount--;
-
-						//fixation area where another ship can't be
-						int coorShipHeadI = this->ships[shipCounter].getI();
-						int coorShipHeadJ = this->ships[shipCounter].getJ();
-
-						if (this->ships[shipCounter].getDirection()) //horizontal
-						{
-							for (int i = coorShipHeadI - 1; i <= coorShipHeadI + 1; i++)
-							{
-								for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + this->ships[shipCounter].getDeckAmount(); j++)
-								{
-									if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
-									{
-										if (this->map[i][j].value == 0) this->map[i][j].value = 3;
-									}
-
-								}
-							}
-						}
-						else //vertical
-						{
-							for (int i = coorShipHeadI - 1; i <= coorShipHeadI + this->ships[shipCounter].getDeckAmount(); i++)
-							{
-								for (int j = coorShipHeadJ - 1; j <= coorShipHeadJ + 1; j++)
-								{
-									if (i >= 0 && i < this->mapSizeI && j >= 0 && j < this->mapSizeJ)
-									{
-										if (this->map[i][j].value == 0) this->map[i][j].value = 3;
-									}
-								}
-							}
-						}
-						return 2;
-					}
-				}
-			}
-			return 1;
-
-		case 0: //miss
-			this->map[mapCoord.i][mapCoord.j].value = 3;
-			return 0;
-		case 2: //attack the same field second time
-		case 3: //attack the same field second time
-			return 0;
-	}
-}
-
-void Map::clearMap()
-{
-	this->ships.clear();
-	for (int i = 0; i < this->mapSizeI; i++)
-	{
-		this->map[i].resize(mapSizeJ);
-		for (int j = 0; j < this->mapSizeJ; j++)
-		{
-			this->map[i][j].value = 0;
-		}
-	}
-	this->shipsAmount = 0;
-	this->currentShipsAmount = 0;
-}
-
-void Map::updateMap(const sf::RenderWindow* window, bool enemyMap)
+void Map::updateMap(const sf::Vector2f& mousePos, bool enemyMap)
 {
 	//determination Chosen Map Field in depending on cursor location
 
@@ -492,7 +607,7 @@ void Map::updateMap(const sf::RenderWindow* window, bool enemyMap)
 	{
 		for (int j = 0; j < this->getSizeJ(); j++)
 		{
-			if (this->map[i][j].shape.getGlobalBounds().contains((float)sf::Mouse::getPosition(*window).x, (float)sf::Mouse::getPosition(*window).y))
+			if (this->map[i][j].shape.getGlobalBounds().contains(mousePos))
 			{
 				this->map[i][j].shape.setFillColor(sf::Color::Cyan);
 				chosenField.i = i;
@@ -506,10 +621,7 @@ void Map::updateMap(const sf::RenderWindow* window, bool enemyMap)
 			else if (this->map[i][j].value == 3) this->map[i][j].shape.setFillColor(sf::Color(0, 255, 0, 230));
 
 			else
-			{
 				this->map[i][j].shape.setFillColor(sf::Color(0, 102, 255, 230));
-			}
-
 		}
 	}
 

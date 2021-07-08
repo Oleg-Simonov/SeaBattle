@@ -15,7 +15,8 @@ protected:
 	sf::Sprite backgroundSprite;
 
 	std::vector<State*>* statesPointer;
-	sf::Vector2i mousePosWindow;
+	sf::Vector2i mousePosWindowi;
+	sf::Vector2f mousePosWindowf;
 	sf::Clock clock;
 	sf::Event sfEvent;
 

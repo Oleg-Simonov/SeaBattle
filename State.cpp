@@ -6,7 +6,6 @@ State::State(std::vector<State*>* statesPointer)
 	else this->backgroundSprite.setTexture(backgroundTexture);
 
 	this->endState = 0;
-
 	this->statesPointer = statesPointer;
 }
 
@@ -21,6 +20,8 @@ const int State::getEndState() const
 
 void State::mouseUpdatePosition(sf::RenderWindow* targetWindow)
 {
-	this->mousePosWindow = sf::Mouse::getPosition(*targetWindow);
-	//std::cout << mousePosWindow.x << " " << mousePosWindow.y << std::endl;
+	this->mousePosWindowi = sf::Mouse::getPosition(*targetWindow);
+	this->mousePosWindowf.x = (float)mousePosWindowi.x;
+	this->mousePosWindowf.y = (float)mousePosWindowi.y;
+	//std::cout << mousePosWindowi.x << " " << mousePosWindowi.y << std::endl;
 }

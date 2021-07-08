@@ -3,7 +3,7 @@
 Legend::Legend(int x, int y)
 {
 	//init font
-	if (!this->font.loadFromFile("Fonts\\font.ttf"))	std::cout << "Font error" << std::endl; //should be refined
+	if (!this->font.loadFromFile("Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error Legend", (LPCWSTR)L"Error message", 0);
 
 	//init legend
 	textLegend.setFont(font);

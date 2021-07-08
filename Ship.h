@@ -17,6 +17,8 @@ public:
 	bool getDirection() const;
 	int getShipHp() const;
 
+	void turn(int mapSize);
+	void reflect(int mapSize);
 	int isItDamage(int attakI, int attakJ); //function checks whether the ship contains a deck with coordinates attakI and attakJ. If yes - lessens ships HP by 1 and returns 1, else - returns 0.
 };
 
