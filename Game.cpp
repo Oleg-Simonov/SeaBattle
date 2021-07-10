@@ -7,7 +7,7 @@ Game::Game()
 	//init window
 	this->videoMode.width = 1200;
 	this->videoMode.height = 630;
-	this->window = new sf::RenderWindow(videoMode, "SeaBattle");
+	this->window = new sf::RenderWindow(videoMode, "SeaBattle v0.1", sf::Style::Close);
 	this->window->setFramerateLimit(60);
 	this->window->setKeyRepeatEnabled(false);
 

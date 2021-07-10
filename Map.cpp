@@ -238,7 +238,7 @@ void Map::clearMap()
 	this->currentShipsAmount = 0;
 }
 
-void Map::calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable)
+void Map::calcProhibitedZone(bool dir, int deckAmount)
 {
 	//calculate prohibited zone-------------------------------------------
 	for (size_t i = 0; i < this->prohibitedZone.size(); i++)
@@ -249,7 +249,7 @@ void Map::calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable)
 		}
 	}
 
-	for (int i = 0; i < mapSizeI; i++)
+	/*for (int i = 0; i < mapSizeI; i++)
 	{
 		for (int j = 0; j < mapSizeJ; j++)
 		{
@@ -272,7 +272,7 @@ void Map::calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable)
 			//std::cout << this->prohibitedZone[i][j] << " ";
 		}
 		//std::cout << std::endl;
-	}
+	}*/
 
 	//std::cout << std::endl;
 
@@ -366,11 +366,11 @@ void Map::calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable)
 	}
 }
 
-bool Map::calcCoordinanes(bool dir, int deckAmount, bool isMidAvailable)
+bool Map::calcCoordinanes(bool dir, int deckAmount)
 {
 	//std::cout << "na4alo" << " dir = " << dir <<  std::endl;
 
-	calcProhibitedZone(dir, deckAmount, isMidAvailable);
+	calcProhibitedZone(dir, deckAmount);
 
 
 	//calculate coordinates of head of ship-------------------------------
@@ -420,23 +420,11 @@ void Map::randomPlace(int quant1deckShip, int quant2deckShip, int quant3deckShip
 		{
 			int dir = rand() % 2; //0 - vertical, 1 - horizontal
 			shipsForRandPlacing[i]--;
-			if (i)
+			if (!calcCoordinanes(dir, i + 1))
 			{
-				if (!calcCoordinanes(dir, i + 1))
+				if (!calcCoordinanes(!dir, i + 1))
 				{
-					if (!calcCoordinanes(!dir, i + 1))
-					{
-						MessageBox(0, (LPCWSTR)L"Placing ERROR 1", (LPCWSTR)L"Error message", 0);
-						i = 0;
-						break;
-					}
-				}
-			}
-			else
-			{
-				if (!calcCoordinanes(!dir, i + 1, 1))
-				{
-					MessageBox(0, (LPCWSTR)L"Placing ERROR 2", (LPCWSTR)L"Error message", 0);
+					MessageBox(0, (LPCWSTR)L"Placing ERROR 1", (LPCWSTR)L"Error message", 0);
 					i = 0;
 					break;
 				}
@@ -495,8 +483,8 @@ void Map::randomPlaceForComputer()
 	{
 		this->placeShip(this->ships[i]);
 	}
-	this->getMapValue();
-	std::cout << std::endl;
+	//this->getMapValue();
+	//std::cout << std::endl;
 
 	this->randomPlace(4, 0, 0, 0, 0);
 }
@@ -584,7 +572,7 @@ bool Map::placeShip(const OutMapShip& outMapShip) //for player's ships
 	if (this->chosenField.i == -1) return 0;
 	else
 	{
-		this->calcProhibitedZone(outMapShip.getDirection(), outMapShip.getDeckAmount(), 1);
+		this->calcProhibitedZone(outMapShip.getDirection(), outMapShip.getDeckAmount());
 		if (this->prohibitedZone[this->chosenField.i][this->chosenField.j] == 0)
 		{
 			this->ships.emplace_back(this->chosenField.i, this->chosenField.j, outMapShip.getDirection(), outMapShip.getDeckAmount());

@@ -116,8 +116,6 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 		this->buttons["START_GAME"]->setVisible(0);
 		headerText.setString("Place your ships on the map");
 	}
-
-	//Sleep(1000);
 	
 	while (targetWindow->pollEvent(sfEvent))
 	{
@@ -193,18 +191,16 @@ void PlacingState::update(sf::RenderWindow* targetWindow)
 
 	playerMap.updateMap(this->mousePosWindowf);
 
+	//calculate color for ship: if it is not possible to place, the ship will be red color
 	for (size_t shipCounter = 0; shipCounter < this->outMapShip.size(); shipCounter++)
 	{
 		if(this->playerMap.getChosenField().i == -1) outMapShip[shipCounter].update(targetWindow, -1);
 		else 
 		{
-			this->playerMap.calcProhibitedZone(outMapShip[shipCounter].getDirection(), outMapShip[shipCounter].getDeckAmount(), 1);
+			this->playerMap.calcProhibitedZone(outMapShip[shipCounter].getDirection(), outMapShip[shipCounter].getDeckAmount());
 			outMapShip[shipCounter].update(targetWindow, this->playerMap.getProhibitedZoneIJ(this->playerMap.getChosenField()));
 		}
 	}
-		
-	
-
 }
 
 void PlacingState::render(sf::RenderWindow* targetWindow)

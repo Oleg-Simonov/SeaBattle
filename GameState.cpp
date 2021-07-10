@@ -3,11 +3,13 @@
 GameState::GameState(std::vector<State*>* statesPointer, Map* playerMap) : State(statesPointer)
 {
 	srand(static_cast<unsigned int>(time(0)));
+
 	//init var
 	this->winFlag = 0;
 
 	this->playerMap = playerMap;
-	this->playerMove = true;
+	
+	this->playerMove = rand() % 2; //who go first we choose randomly
 
 	//init font
 	if (!this->font.loadFromFile("Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error GameState", (LPCWSTR)L"Error message", 0);
@@ -23,7 +25,7 @@ GameState::GameState(std::vector<State*>* statesPointer, Map* playerMap) : State
 
 	textInfo.setFont(font);
 	textInfo.setCharacterSize(35);
-	textInfo.setPosition(sf::Vector2f(535, 45));
+	textInfo.setPosition(sf::Vector2f(515, 45));
 
 	//Buttors init
 	this->buttons["START_AGAIN"] = new Button(650, 525, 170, 50,
@@ -269,8 +271,8 @@ void GameState::update(sf::RenderWindow* targetWindow)
 				if (result == 1 || result == 2) this->soundCrash.play();
 				else if (result == 0) this->soundMiss.play();
 				
-				this->enemyMap.getMapValue(); 
-				std::cout << std::endl;
+				//this->enemyMap.getMapValue(); 
+				//std::cout << std::endl;
 			}
 
 			if (buttons["START_AGAIN"]->isPressed())
@@ -279,7 +281,6 @@ void GameState::update(sf::RenderWindow* targetWindow)
 			if (buttons["QUIT"]->isPressed())
 				this->endState = -1;
 		}
-
 	}
 
 	if (enemyMap.getCurrentShipsAmount() > 0 && playerMap->getCurrentShipsAmount() > 0)
@@ -293,7 +294,7 @@ void GameState::update(sf::RenderWindow* targetWindow)
 				this->clock.restart();
 			}
 		}
-		else this->textInfo.setString("You move");
+		else this->textInfo.setString("Your move");
 	}
 	else if (enemyMap.getCurrentShipsAmount() <= 0 && this->winFlag == 0)
 	{

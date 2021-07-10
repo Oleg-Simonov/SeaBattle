@@ -68,8 +68,8 @@ public:
 	int attack(const MapCoord& mapCoord); //if attackI and attackJ are exist then computer attacks player's map
 	void clearMap();
 
-	void calcProhibitedZone(bool dir, int deckAmount, bool isMidAvailable = 0);
-	bool calcCoordinanes(bool dir, int deckAmount, bool isMidAvailable = 0);
+	void calcProhibitedZone(bool dir, int deckAmount);
+	bool calcCoordinanes(bool dir, int deckAmount);
 	void placeShip(const Ship& ship);
 	bool placeShip(const OutMapShip& ship);
 	void randomPlace(int quant1deckShip, int quant2deckShip, int quant3deckShip, int quant4deckShip, int quant5deckShip);
