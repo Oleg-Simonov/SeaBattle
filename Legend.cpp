@@ -1,9 +1,9 @@
 #include "Legend.h"
 
-Legend::Legend(int x, int y)
+Legend::Legend(float x, float y)
 {
 	//init font
-	if (!this->font.loadFromFile("Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error Legend", (LPCWSTR)L"Error message", 0);
+	if (!this->font.loadFromFile("Resources\\Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error Legend", (LPCWSTR)L"Error message", 0);
 
 	//init legend
 	textLegend.setFont(font);

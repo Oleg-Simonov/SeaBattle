@@ -14,7 +14,7 @@ private:
     sf::RectangleShape unexploredField, emptyField, deckOfShip, destrDeck, bound;
 
 public:
-    Legend(int x, int y);
+    Legend(float x, float y);
     ~Legend();
 
     void update(sf::RenderWindow* targetWindow);

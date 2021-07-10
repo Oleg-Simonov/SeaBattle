@@ -13,6 +13,7 @@ protected:
 
 	sf::Texture backgroundTexture;
 	sf::Sprite backgroundSprite;
+	sf::Font font;
 
 	std::vector<State*>* statesPointer;
 	sf::Vector2i mousePosWindowi;

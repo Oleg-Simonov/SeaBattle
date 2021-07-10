@@ -22,7 +22,6 @@ private:
     sf::Sound soundWin;
     sf::Sound soundLose;
 
-    sf::Font font;
     sf::Text textAboutPlayer;
     sf::Text textAboutEnemy;
     sf::Text textInfo;

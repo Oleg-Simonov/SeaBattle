@@ -5,9 +5,6 @@ PlacingState::PlacingState(std::vector<State*>* statesPointer) : State(statesPoi
 	this->helpTextBackground.setFillColor(sf::Color(70, 70, 70, 175));
 	this->helpTextBackground.setPosition(685.f, 443.f);
 	this->helpTextBackground.setSize(sf::Vector2f(470.f, 180.f));
-
-	//init font
-	if (!this->font.loadFromFile("Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error PlacingState", (LPCWSTR)L"Error message", 0);
 	
 	//init text
 	headerText.setFont(font);

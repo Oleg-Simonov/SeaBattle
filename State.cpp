@@ -7,6 +7,9 @@ State::State(std::vector<State*>* statesPointer)
 
 	this->endState = 0;
 	this->statesPointer = statesPointer;
+
+	//init font
+	if (!this->font.loadFromFile("Resources\\Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error State", (LPCWSTR)L"Error message", 0);
 }
 
 State::~State()

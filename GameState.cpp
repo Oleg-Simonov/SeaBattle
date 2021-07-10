@@ -11,9 +11,6 @@ GameState::GameState(std::vector<State*>* statesPointer, Map* playerMap) : State
 	
 	this->playerMove = rand() % 2; //who go first we choose randomly
 
-	//init font
-	if (!this->font.loadFromFile("Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error GameState", (LPCWSTR)L"Error message", 0);
-
 	//init text
 	textAboutPlayer.setFont(font);
 	textAboutPlayer.setCharacterSize(21);
@@ -24,8 +21,8 @@ GameState::GameState(std::vector<State*>* statesPointer, Map* playerMap) : State
 	textAboutEnemy.setPosition(sf::Vector2f(800, 425));
 
 	textInfo.setFont(font);
-	textInfo.setCharacterSize(35);
-	textInfo.setPosition(sf::Vector2f(515, 45));
+	textInfo.setCharacterSize(30);
+	textInfo.setPosition(sf::Vector2f(515, 30));
 
 	//Buttors init
 	this->buttons["START_AGAIN"] = new Button(650, 525, 170, 50,

@@ -21,7 +21,7 @@ Map::Map(float coorWindX, float coorWindY, bool enemy) : prohibitedZone(10, std:
 	std::cout << "----------Map Construcror1----------" << std::endl;
 #endif
 	//init font
-	if (!this->font.loadFromFile("Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error GameState", (LPCWSTR)L"Error message", 0);
+	if (!this->font.loadFromFile("Resources\\Fonts\\font.ttf"))	MessageBox(0, (LPCWSTR)L"Font error Map", (LPCWSTR)L"Error message", 0);
 
 	//init var
 	this->currentShipsAmount = 0;

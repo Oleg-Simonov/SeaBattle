@@ -14,7 +14,6 @@ private:
     sf::SoundBuffer soundBufferFlipShip;
     sf::Sound soundFlipShip;
 
-    sf::Font font;
     sf::Text headerText;
     sf::Text helpText;
     sf::Text yourShipsText;
